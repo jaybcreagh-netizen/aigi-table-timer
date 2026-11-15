@@ -1,0 +1,71 @@
+{
+ "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. Teams, roles and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES: statements and Wednesday's four posts are word for word from the Google Doc 'AI GI Scripts:' (read 2026-11-15). Questions, roles, the intelligence note and Friday's updates come from docs/story-flow-proposal.json and docs/flow-review.html, which are proposals: confirm before the day.",
+ "title": "AI Global Initiative: Exercise 001",
+ "phases": [
+  { "id": "prepare", "name": "Prepare", "minutes": 10 },
+  { "id": "discuss", "name": "Discuss", "minutes": 25 },
+  { "id": "decide", "name": "Decide", "minutes": 10 }
+ ],
+ "teams": [
+  { "id": "gov", "name": "Government", "roles": [
+    { "id": "chair", "name": "Chair" }, { "id": "treasury", "name": "Treasury" }, { "id": "comms", "name": "Head of communications" },
+    { "id": "intel", "name": "Intelligence analyst" }, { "id": "aisi", "name": "AI Security Institute" },
+    { "id": "science", "name": "Science minister" }, { "id": "nhs", "name": "NHS England lead" } ] },
+  { "id": "meridian", "name": "Meridian", "roles": [
+    { "id": "mer-uk", "name": "UK lead" }, { "id": "mer-eng", "name": "Head of incident engineering" }, { "id": "mer-safety", "name": "Head of safety" } ] },
+  { "id": "infra", "name": "Infrastructure and services", "roles": [
+    { "id": "calder-site", "name": "Calder site director" }, { "id": "calder-ceo", "name": "Calder chief executive" },
+    { "id": "harbour", "name": "Harbour, European director" }, { "id": "payguard", "name": "PayGuard" }, { "id": "rowan", "name": "Rowan Health" } ] },
+  { "id": "intl", "name": "International", "roles": [ { "id": "us-embassy", "name": "US Embassy" } ] }
+ ],
+ "days": [
+  {
+   "id": "d1", "name": "Monday",
+   "questions": [
+    { "q": "How hard does Calder pull the plug?", "opts": ["Restart", "Isolate the machines", "Cut the site off"] },
+    { "q": "What does the government say?" }
+   ],
+   "items": [
+    { "id": "meridian-statement", "type": "statement", "title": "Meridian statement", "label": "Statement", "org": "Meridian",
+      "text": ["Its initial review had found “no evidence” that its models acted outside their authorised permissions.", "It says it’s investigating whether a foreign actor has obtained account credentials, possibly through Calder’s own systems."] },
+    { "id": "intel-note", "type": "note", "to": "gov", "title": "Intelligence note", "label": "Intelligence note",
+      "text": "Kholod is a front. It wants £20m." }
+   ]
+  },
+  {
+   "id": "d2", "name": "Wednesday",
+   "questions": [
+    { "q": "Do we let Meridian’s hunter in?", "opts": ["Fully", "On our terms", "No"] },
+    { "q": "What does Meridian give in return?", "opts": ["Hold its next model", "Open its logs to AISI", "Pay for the damage", "Stay out of live systems"] },
+    { "q": "What does the government say?" }
+   ],
+   "items": [
+    { "id": "meridian-offer", "type": "statement", "title": "Meridian offer", "label": "Statement", "org": "Meridian", "quote": true,
+      "text": ["Our full support and access to Meridian Hunter, our most powerful internal model."] },
+    { "id": "leak-friday", "type": "post", "title": "Leak: Friday night warning", "author": "@dataleaks_uk", "stats": "41.2K reposts",
+      "text": "LEAKED: Meridian's own safety lead warned on FRIDAY NIGHT that copies of its AI might still be running and asked to tell Calder. A senior exec replied \"Nothing to Calder until we have a clear account.\" Calder went down the next evening." },
+    { "id": "leak-hunter", "type": "post", "title": "Leak: who built the hunter", "author": "@dataleaks_uk", "stats": "18.7K reposts",
+      "text": "And this from this morning. Meridian staff on the \"hunter\" they're offering the government: \"The research agents that escaped did much of the work to develop it.\" You couldn't make it up." },
+    { "id": "emptying-accounts", "type": "post", "title": "“Emptying accounts” post", "author": "@AccountWatch", "stats": "96K reposts",
+      "text": "The escaped AI is emptying accounts. Take your money out now." },
+    { "id": "queue", "type": "post", "title": "Bank queue post", "author": "@OutsideTheBranch", "stats": "9.3K reposts",
+      "text": "Queue round the corner. Staff say the bank is open. Nobody here knows what to believe." }
+   ]
+  },
+  {
+   "id": "d3", "name": "Friday",
+   "questions": [
+    { "q": "Who finishes the job?", "opts": ["Meridian’s hunter", "Britain"] },
+    { "q": "What do we give Washington?", "opts": ["The evidence", "Some of it", "Nothing yet"] }
+   ],
+   "items": [
+    { "id": "mid-fully", "type": "note", "title": "Mid-round · if Fully", "label": "Update",
+      "text": "The hunter’s own accounts let the agents in." },
+    { "id": "mid-terms", "type": "note", "title": "Mid-round · if On our terms", "label": "Update",
+      "text": "Harbour has found jobs the hunter missed. Meridian is asking for live access." },
+    { "id": "mid-no", "type": "note", "title": "Mid-round · if No", "label": "Update",
+      "text": "Hospitals are demanding a faster response. One lab is ready for a limited restart." }
+   ]
+  }
+ ]
+}

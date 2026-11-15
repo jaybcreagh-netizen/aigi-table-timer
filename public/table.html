@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0B1B33"><meta name="robots" content="noindex">
+<title>AI Global Initiative: Exercise 001</title>
+<!-- AIGI participant screen. /play, then /play?team=<id>&role=<id>. The look is the BN24 v0.6 "AIGI blue" package (brand/bn24-blue.css): navy, the #7298E9 light,
+     the dot map, and the clock set like the wordmark: white minutes, lit-glass seconds, and the lockup's bar draining as the time runs.
+     No BN24 mark: this is the room's clock, not a broadcast. Time up flips the screen to the package's light palette. -->
+<style>
+@font-face { font-family: "Schibsted Grotesk"; font-weight: 400 900; src: url("fonts/schibsted-grotesk-latin-wght-normal.woff2") format("woff2"); }
+@font-face { font-family: "ArchivoV"; font-weight: 100 900; font-stretch: 62% 125%; src: url("fonts/archivo-latin-wdth-normal.woff2") format("woff2"); }
+:root { --navy: #0B1B33; --navy-hi: #14294B; --deep: #061022; --blue: #7298E9; --blue-hi: #9DB8F2; --blue-lo: #4F78D6; --ice: #CFE0FF; --grey: #E6EBF5;
+  --fg: #fff; --soft: rgba(207,224,255,.62); --line: rgba(114,152,233,.28); --pad: clamp(16px, 3.2vmin, 40px); }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--deep); color: var(--fg); font-family: "Schibsted Grotesk", system-ui, sans-serif; -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+body { display: flex; flex-direction: column; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+
+/* ground: navy, the dot map, two hairline flares */
+.bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(120% 90% at 30% 40%, var(--navy-hi) 0%, var(--navy) 45%, var(--deep) 100%); transition: background .6s; overflow: hidden; }
+.bg img { position: absolute; left: 50%; top: 50%; width: max(150vw, 190vh); transform: translate(-46%, -47%); opacity: .2; transition: opacity .6s; }
+.bg i { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--blue) 30%, var(--ice) 50%, var(--blue) 70%, transparent); opacity: .35; }
+.bg i.a { top: 21%; } .bg i.b { bottom: 17%; opacity: .2; }
+.bg i.a::after { content: ""; position: absolute; left: 12%; width: 34%; top: -3px; height: 7px; background: radial-gradient(closest-side, rgba(207,224,255,.55), transparent); }
+
+header { position: relative; z-index: 1; display: flex; align-items: baseline; gap: 14px; padding: var(--pad) var(--pad) 0; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: clamp(12px, 1.9vmin, 20px); }
+header .team { color: var(--fg); cursor: pointer; } header .role { color: var(--soft); } header .day { color: var(--blue); }
+header .conn { margin-left: auto; align-self: center; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); opacity: .0; transition: opacity .3s; }
+body.offline header .conn { opacity: 1; background: #F2B134; }
+
+main { position: relative; z-index: 1; flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr; gap: var(--pad); padding: var(--pad); }
+body.has-feed main { grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); }
+
+/* the clock, set like the BN24 lockup */
+.stage { container-type: size; display: flex; flex-direction: column; justify-content: center; min-height: 0; min-width: 0; }
+.stage > * { --u: min(26cqw, 52cqh); }
+.phase { font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--blue); font-size: calc(var(--u) * .2); margin: 0 0 calc(var(--u) * .12) calc(var(--u) * .45); min-height: 1.2em; transition: color .4s; }
+.clock { display: flex; align-items: stretch; gap: calc(var(--u) * .32); font-size: var(--u); }
+.bar { width: .13em; flex: none; position: relative; background: rgba(114,152,233,.16); }
+.bar b { position: absolute; left: 0; right: 0; bottom: 0; height: 100%; background: linear-gradient(180deg, #E4EDFF, var(--blue)); transition: height .25s linear; }
+.digits { font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -0.035em; line-height: .82; display: flex; align-items: baseline; padding: .06em 0 .02em; white-space: nowrap; }
+.digits span { display: inline-block; width: .685em; text-align: center; }
+.digits span.c { width: .3em; transform: translateY(-.06em); }
+.mm { color: var(--fg); display: flex; } .mm .c { color: var(--fg); }
+.ss { display: flex; background: linear-gradient(180deg, #E4EDFF 0%, #A9C2F7 38%, #7298E9 62%, #4F78D6 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.word { font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -0.035em; line-height: .9; font-size: .62em; align-self: center; padding: .1em 0; }
+.rail { display: flex; gap: calc(var(--u) * .08); margin: calc(var(--u) * .2) 0 0 calc(var(--u) * .45); max-width: calc(var(--u) * 3.3); }
+.rail div { flex: 1; padding-top: calc(var(--u) * .07); border-top: 3px solid var(--line); font-weight: 700; font-size: calc(var(--u) * .105); letter-spacing: .1em; text-transform: uppercase; color: var(--soft); opacity: .7; transition: all .4s; white-space: nowrap; }
+.rail div.done { border-color: var(--blue-lo); } .rail div.on { border-color: var(--ice); color: var(--fg); opacity: 1; }
+
+body.standby .phase, body.standby .bar b { opacity: 0; }
+body.paused .digits { opacity: .45; } body.paused .bar b { opacity: .45; }
+@keyframes pulse { 50% { opacity: .35; } }
+body.last .bar b { animation: pulse 1s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { body.last .bar b { animation: none; } }
+
+/* time up: the light palette */
+body.up { --fg: #0B1B33; --soft: rgba(11,27,51,.6); --line: rgba(79,120,214,.3); }
+body.up .bg { background: radial-gradient(120% 90% at 30% 40%, #fff 0%, #EEF3FC 50%, #DCE6F8 100%); } body.up .bg img { opacity: .5; }
+body.up header .day, body.up .phase { color: #23479E; }
+body.up .ss { background: linear-gradient(180deg, #7298E9 0%, #4F78D6 55%, #2E55B8 100%); -webkit-background-clip: text; background-clip: text; }
+body.up .rail div.on { border-color: var(--blue-lo); }
+
+/* briefing */
+.feed { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 2px 2px 40px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.feed::-webkit-scrollbar { display: none; }
+.card { position: relative; flex: none; padding: 18px 20px 20px; font-size: 16px; line-height: 1.38; box-shadow: 0 14px 36px rgba(2,8,20,.45); cursor: pointer; animation: in .5s cubic-bezier(.16,.84,.12,1) both; }
+@keyframes in { from { opacity: 0; transform: translateY(18px); } }
+.card.new::after { content: ""; position: absolute; right: 14px; top: 14px; width: 10px; height: 10px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(114,152,233,.25); }
+.eyebrow { font-weight: 800; font-size: .72em; letter-spacing: .14em; text-transform: uppercase; }
+.statement { color: #fff; background: linear-gradient(180deg, rgba(20,41,75,.94), rgba(11,27,51,.97)); border-top: 3px solid var(--blue); box-shadow: 0 14px 36px rgba(2,8,20,.5), inset 0 1px 0 rgba(207,224,255,.22); }
+.statement .eyebrow { color: var(--blue); } .statement .who { font-weight: 800; font-size: 1.2em; margin-top: 6px; }
+.statement .rule { height: 2px; margin: 12px 0 13px; background: linear-gradient(90deg, #7298E9, #CFE0FF 40%, rgba(114,152,233,0)); }
+.statement .q { font-weight: 700; font-size: 1.12em; line-height: 1.3; } .statement .q div + div { margin-top: .55em; }
+.post, .thread { background: #fff; color: #0B1B33; border-radius: 3px; }
+.post .top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; } .post .av { width: 2.4em; height: 2.4em; border-radius: 50%; background: #5B6B8C; color: #fff; display: grid; place-items: center; font-weight: 800; font-size: .85em; flex: none; }
+.post .name { font-weight: 800; line-height: 1.15; } .post .meta { font-size: .8em; color: #6B7280; } .post .text { font-size: 1.08em; white-space: pre-line; } .post .stats { margin-top: 10px; font-size: .78em; color: #6B7280; }
+.thread { padding: 0; overflow: hidden; } .thread .src { background: #1B2333; color: #fff; padding: 9px 20px; font-weight: 800; font-size: .7em; letter-spacing: .14em; text-transform: uppercase; }
+.thread .msgs { padding: 12px 20px 4px; } .thread .m { margin-bottom: 11px; } .thread .m b { font-size: .86em; } .thread .m b span { font-weight: 500; color: #6B7280; margin-left: 6px; } .thread .m p { margin: 1px 0 0; }
+.thread .foot { padding: 0 20px 14px; font-size: .76em; color: #6B7280; }
+.note { color: var(--navy); background: linear-gradient(180deg, var(--blue-hi), var(--blue) 55%, var(--blue-lo)); }
+.note .eyebrow { opacity: .8; } .note .text { font-weight: 800; font-size: 1.25em; line-height: 1.25; margin-top: 6px; white-space: pre-line; }
+.ask { color: #0B1B33; background: linear-gradient(180deg, #FFFFFF 0%, #F2F5FB 55%, #E1E8F5 100%); border-left: 6px solid var(--blue-lo); cursor: default; }
+.ask .eyebrow { color: #23479E; } .ask h2 { font-size: 1.55em; line-height: 1.12; letter-spacing: -.01em; margin: 6px 0 0; font-weight: 800; }
+.ask .opts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; } .ask .opts span { border: 1.5px solid rgba(11,27,51,.35); padding: 4px 10px; font-weight: 700; font-size: .88em; }
+.ask .more { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(11,27,51,.14); } .ask .more h3 { margin: 0; font-size: 1.05em; font-weight: 800; }
+
+.reader { position: fixed; inset: 0; z-index: 5; display: none; place-items: center; padding: 6vmin; background: rgba(4,10,24,.82); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.reader.open { display: grid; } .reader .card { width: min(900px, 100%); max-height: 100%; overflow-y: auto; font-size: clamp(19px, 3.1vmin, 30px); padding: 1.4em 1.5em; animation-duration: .3s; }
+.reader .thread { padding: 0; } .reader .card.new::after { display: none; }
+
+
+.pick { position: fixed; inset: 0; z-index: 6; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; }
+.pick.open { display: flex; } .pick h1 { font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -.03em; font-size: clamp(26px, 5vmin, 46px); margin: 0 0 18px; text-align: center; line-height: 1; }
+.pick h2 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); margin: -8px 0 8px; font-weight: 800; }
+.pick .list { width: min(420px, 100%); max-height: 62vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.pick input { width: min(420px, 100%); padding: 16px 18px; font: inherit; font-size: 19px; font-weight: 700; color: #fff; background: rgba(114,152,233,.1); border: 1.5px solid var(--line); text-align: center; }
+.pick a.back { background: none; border: 0; text-align: center; font-size: 15px; font-weight: 600; color: var(--soft); }
+.pick a { display: block; cursor: pointer; width: min(420px, 100%); padding: 16px 22px; color: #fff; text-decoration: none; font-weight: 800; font-size: 19px; background: linear-gradient(180deg, rgba(20,41,75,.94), rgba(11,27,51,.97)); border-left: 4px solid var(--blue); }
+
+@media (orientation: portrait), (max-width: 700px) {
+  main, body.has-feed main { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .stage { container-type: inline-size; padding: 2vh 0; } .stage > * { --u: 22.5cqw; } .rail div { font-size: calc(var(--u) * .085); letter-spacing: .06em; }
+  body:not(.has-feed) main { grid-template-rows: 1fr; }
+}
+</style></head>
+<body class="standby">
+<div class="bg"><img src="map.png" alt=""><i class="a"></i><i class="b"></i></div>
+<header><span class="team" id="team"></span><span class="role" id="role"></span><span class="day" id="day"></span><span class="conn"></span></header>
+<main>
+  <section class="stage">
+    <div class="phase" id="phase"></div>
+    <div class="clock"><div class="bar"><b id="bar"></b></div><div class="digits" id="digits"></div></div>
+    <div class="rail" id="rail"></div>
+  </section>
+  <aside class="feed" id="feed" hidden></aside>
+</main>
+<div class="reader" id="reader"></div>
+<div class="pick" id="pick"></div>
+<script>
+const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const Q = new URLSearchParams(location.search), team = Q.get('team');
+let v = null, offset = 0, feedSig = '', seen = new Set();
+try { seen = new Set(JSON.parse(localStorage.getItem('aigi-seen') || '[]')); } catch {}
+const markSeen = (k) => { seen.add(k); try { localStorage.setItem('aigi-seen', JSON.stringify([...seen].slice(-300))); } catch {} };
+
+const cardHTML = (it) => {
+  const cls = `card ${it.type}${seen.has(it.key) ? '' : ' new'}`, k = `data-key="${esc(it.key)}"`;
+  if (it.type === 'statement') return `<div class="${cls}" ${k}><div class="eyebrow">${esc(it.label || 'Statement')}</div><div class="who">${esc(it.org)}</div><div class="rule"></div>
+    <div class="q">${it.text.map((t, i) => `<div>${it.quote && i === 0 ? '“' : ''}${esc(t)}${it.quote && i === it.text.length - 1 ? '”' : ''}</div>`).join('')}</div></div>`;
+  if (it.type === 'post') return `<div class="${cls}" ${k}><div class="top"><div class="av">${esc((it.author || '?').replace(/^@/, '').split(/[ _]/).map((w) => w[0]).slice(0, 2).join('').toUpperCase())}</div>
+    <div><div class="name">${esc(it.author)}</div><div class="meta">${esc([it.handle, it.time].filter(Boolean).join(' · '))}</div></div></div><div class="text">${esc(it.text)}</div>${it.stats ? `<div class="stats">${esc(it.stats)}</div>` : ''}</div>`;
+  if (it.type === 'thread') return `<div class="${cls}" ${k}><div class="src">${esc(it.source || it.label)}</div><div class="msgs">${it.messages.map((m) => `<div class="m"><b>${esc(m.who)}<span>${esc(m.t)}</span></b><p>${esc(m.text)}</p></div>`).join('')}</div>${it.foot ? `<div class="foot">${esc(it.foot)}</div>` : ''}</div>`;
+  return `<div class="${cls}" ${k}><div class="eyebrow">${esc([it.label, it.only && it.only + ' only'].filter(Boolean).join(' · ') || 'Note')}</div><div class="text">${esc(it.text)}</div></div>`;
+};
+const askHTML = (qs) => !qs.length ? '' : `<div class="card ask"><div class="eyebrow">Decide</div><h2>${esc(qs[0].q)}</h2>${qs[0].opts ? `<div class="opts">${qs[0].opts.map((o) => `<span>${esc(o)}</span>`).join('')}</div>` : ''}
+  ${qs.slice(1).map((q) => `<div class="more"><h3>${esc(q.q)}</h3>${q.opts ? `<div class="opts">${q.opts.map((o) => `<span>${esc(o)}</span>`).join('')}</div>` : ''}</div>`).join('')}</div>`;
+
+function render() {
+  $('team').textContent = v.team.name; $('role').textContent = v.role ? v.role.name : ''; $('day').textContent = v.day.name; document.title = `${v.role ? v.role.name : v.team.name} · ${v.title}`;
+  const idx = v.phases.findIndex((p) => p.id === v.phase);
+  $('phase').textContent = idx >= 0 ? v.phases[idx].name : '';
+  $('rail').innerHTML = v.phases.map((p, i) => `<div class="${i < idx ? 'done' : i === idx ? 'on' : ''}">${esc(p.name)}</div>`).join('');
+  const sig = JSON.stringify([v.questions, v.feed.map((f) => f.key), v.day.id]);
+  if (sig !== feedSig) {
+    const first = feedSig === ''; feedSig = sig;
+    $('feed').innerHTML = askHTML(v.questions) + v.feed.map(cardHTML).join('');
+    if (first) $('feed').querySelectorAll('.card').forEach((c) => c.style.animation = 'none');
+    const has = v.questions.length + v.feed.length > 0; $('feed').hidden = !has; document.body.classList.toggle('has-feed', has); $('feed').scrollTop = 0;
+  }
+  tick();
+}
+function tick() {
+  if (!v) return;
+  const b = document.body.classList, live = !!v.phase;
+  const ms = !live ? 0 : v.running ? v.endsAt - (Date.now() + offset) : v.remainingMs, s = Math.max(0, Math.ceil(ms / 1000));
+  b.toggle('standby', !live); b.toggle('paused', live && !v.running && ms > 0); b.toggle('up', live && ms <= 0); b.toggle('last', live && v.running && ms > 0 && ms <= 60000);
+  const d = (n) => String(n).padStart(2, '0').split('').map((c) => `<span>${c}</span>`).join('');
+  const html = live ? `<div class="mm">${d(Math.floor(s / 60))}<span class="c">:</span></div><div class="ss">${d(s % 60)}</div>` : `<div class="word">${esc(v.day.name)}</div>`;
+  if ($('digits').dataset.h !== html) { $('digits').dataset.h = html; $('digits').innerHTML = html; }
+  $('bar').style.height = (live && v.durationMs ? Math.max(0, Math.min(1, ms / v.durationMs)) * 100 : 100) + '%';
+}
+setInterval(tick, 200);
+
+document.addEventListener('click', (e) => {
+  wake();
+  if ($('reader').classList.contains('open')) { $('reader').classList.remove('open'); $('reader').innerHTML = ''; return; }
+  const c = e.target.closest('.feed .card[data-key]'); if (!c) return;
+  markSeen(c.dataset.key); c.classList.remove('new');
+  $('reader').innerHTML = c.outerHTML; $('reader').classList.add('open');
+});
+let lock = null; const wake = async () => { try { if (!lock && navigator.wakeLock) { lock = await navigator.wakeLock.request('screen'); lock.onrelease = () => lock = null; } } catch {} };
+document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); }); wake();
+
+// joining: pick a table, then a role (or the whole table). The seat is remembered on the device; tap the table's name to change it.
+const store = { get: (k) => { try { return localStorage.getItem(k) || ''; } catch { return ''; } }, set: (k, x) => { try { localStorage.setItem(k, x); } catch {} } };
+const pick = (html) => { $('pick').innerHTML = html; $('pick').classList.add('open'); };
+const seatURL = (t, r) => `play?team=${encodeURIComponent(t)}${r ? '&role=' + encodeURIComponent(r) : ''}`;
+async function seats() {
+  for (;;) {
+    const r = await fetch('seats?code=' + encodeURIComponent(store.get('aigi-code'))), j = await r.json();
+    if (r.ok) return j;
+    await new Promise((done) => { pick(`<h1>${esc(j.title)}</h1><h2>Room code</h2><input id="code" autocomplete="off" autocapitalize="off" enterkeyhint="go">`);
+      $('code').focus(); $('code').onkeydown = (e) => { if (e.key === 'Enter' && $('code').value.trim()) { store.set('aigi-code', $('code').value.trim()); done(); } }; });
+  }
+}
+function chooser(t) {
+  const teams = () => pick(`<h1>${esc(t.title)}</h1><div class="list">${t.teams.map((x) => `<a data-t="${esc(x.id)}">${esc(x.name)}</a>`).join('')}</div>`);
+  const roles = (x) => pick(`<h1>${esc(x.name)}</h1><div class="list"><a href="${seatURL(x.id)}">Whole table</a>${x.roles.map((r) => `<a href="${seatURL(x.id, r.id)}">${esc(r.name)}</a>`).join('')}</div><a class="back" data-back>Back</a>`);
+  $('pick').onclick = (e) => { e.stopPropagation(); const a = e.target.closest('a'); if (!a) return;
+    if (a.dataset.back !== undefined) return teams();
+    if (a.dataset.t) { const x = t.teams.find((y) => y.id === a.dataset.t); if (x.roles.length) roles(x); else location.href = seatURL(x.id); } };
+  teams();
+}
+let es = null, last = 0;
+function connect() {
+  if (es) es.close();
+  es = new EventSource(`events?team=${encodeURIComponent(team)}&role=${encodeURIComponent(Q.get('role') || '')}&code=${encodeURIComponent(store.get('aigi-code'))}`);
+  es.onmessage = (m) => { const x = JSON.parse(m.data); last = Date.now();
+    if (x.gone) { store.set('aigi-seat', ''); location.href = 'play?pick=1'; return; }
+    v = x; offset = v.now - Date.now(); document.body.classList.remove('offline'); render(); };
+  es.onerror = () => document.body.classList.add('offline');
+}
+(async () => {
+  const t = await seats();
+  if (!team) { const saved = store.get('aigi-seat'); if (saved && !Q.has('pick')) location.replace(saved); else chooser(t); return; }
+  store.set('aigi-seat', 'play' + location.search); last = Date.now(); connect();
+  setInterval(() => { if (Date.now() - last > 25000) { document.body.classList.add('offline'); last = Date.now(); connect(); } }, 5000); // a silent connection is a dead one
+  $('team').onclick = (e) => { e.stopPropagation(); if (confirm('Change this device to another table or role?')) location.href = 'play?pick=1'; };
+})();
+</script>
+</body></html>
