@@ -6,30 +6,30 @@ The clock and briefing screen for the room, and the game master's remote. One No
 node table/server.js
 ```
 
-It prints the links and the game master key.
+It prints the links.
 
 | Address | Who | What |
 |---|---|---|
 | `/` | everyone | The portal: Participant or Game master |
-| `/play` | participants | Pick a table, then a role or "Whole table". The device remembers its seat; tap the table's name to change it |
-| `/gm` | game master | Asks for the key once, then remembers it on that device |
+| `/play` | participants | Pick a table once; the device remembers it. Or open a table's own link from Setup |
+| `/gm` | game master | Open to anyone with the address, unless a key is set (`AIGI_KEY=... node table/server.js`) |
 
 ## Game master
 
-- **Run**: pick the day, tap Prepare, Discuss or Decide to start that clock, pause, add or take a minute, end. Send a statement, post or note to everyone, one table or one role. Type a one-off note. The dots show which tables have a device on.
-- **Setup**: the minutes for each phase, the tables and their roles (add, rename, remove, at any time), an optional room code, and the participant link.
+- **Run** is the day as a list, in order, with one big **Next** button: start a phase, send an item, or tick off a main-screen cue. After Decide the button becomes the day's choices: tap what the room decided. That answer names the bulletin version on the next day's cue ("Option B", "On Our Terms") and keeps only the follow-ups that fit. Tap the decision's line in the run sheet to change it. Tap any line in the run sheet to do it out of order (it asks first). Pause, −1 / +1 min and End act on the running clock. **Identify** makes every tablet show its table name for a few seconds. Anything not in the run sheet, and a box for typing a one-off note, sits under "More to send".
+- **Setup** has the minutes, the tables (add, rename, remove, each with its own link) and **Reset for the real run**.
 
 ## Participants
 
-The table or role, the day, the phase and the clock. Items arrive beside the clock; tap one to read it full screen. At Decide the day's questions appear. The last minute pulses, and at zero the screen turns white.
+Before the first phase a tablet shows its table's name. Then the phase and the clock. Items arrive beside the clock; tap one to read it full screen. At Decide the day's questions appear. The last minute pulses, and at zero the screen turns white.
 
-A device is only ever sent items addressed to everyone, its table or its role. A device joined as "Whole table" does not get a role's private notes.
+A tablet stays on its table: hold the table's name for three seconds to change it. A device is only ever sent items addressed to everyone, its table or its role.
 
 ## Content
 
-`content.json` holds the days, the Decide questions and the items that can be sent. Save it and the server reloads. Its teams, roles and minutes are only the starting list: once the game master changes them on Setup, the live copy is in `state.json`.
+`content.json` holds the days, each day's run sheet (`run`), the Decide questions and the items that can be sent. Save it and the server reloads. Its teams, roles and minutes are only the starting list: once the game master changes them on Setup, the live copy is in `state.json`.
 
-What's there now: the statements and Wednesday's four posts are word for word from the current script. The questions, the roles, the intelligence note and Friday's updates come from the story-flow proposal and still need confirming.
+What's there now: the statements and Wednesday's four posts are word for word from the current script. The questions, the intelligence note, Friday's updates and the order of each run sheet come from the story-flow proposal and still need confirming.
 
 ## Hosting it on a domain
 
@@ -40,7 +40,7 @@ The app is ready to sit behind a domain; what's needed is a small always-on host
 3. Point a subdomain (say `play.<the AIGI domain>`) at the host with a CNAME, and add it as a custom domain there.
 4. Use a plan that never sleeps and runs **one** instance: the state is in memory, so two instances would disagree.
 
-Hosted over https, devices hold their own screens awake and any Wi-Fi or mobile data will do. Set a room code on Setup so a stranger who finds the address can't join.
+Hosted over https, devices hold their own screens awake and any Wi-Fi or mobile data will do.
 
 ## Running it in the room instead
 

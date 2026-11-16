@@ -24,7 +24,7 @@ body { display: flex; flex-direction: column; padding: env(safe-area-inset-top) 
 .bg i.a::after { content: ""; position: absolute; left: 12%; width: 34%; top: -3px; height: 7px; background: radial-gradient(closest-side, rgba(207,224,255,.55), transparent); }
 
 header { position: relative; z-index: 1; display: flex; align-items: baseline; gap: 14px; padding: var(--pad) var(--pad) 0; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: clamp(12px, 1.9vmin, 20px); }
-header .team { color: var(--fg); cursor: pointer; } header .role { color: var(--soft); } header .day { color: var(--blue); }
+header .team { color: var(--fg); -webkit-touch-callout: none; } header .role { color: var(--soft); } header .day { color: var(--blue); }
 header .conn { margin-left: auto; align-self: center; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); opacity: .0; transition: opacity .3s; }
 body.offline header .conn { opacity: 1; background: #F2B134; }
 
@@ -43,7 +43,7 @@ body.has-feed main { grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
 .digits span.c { width: .3em; transform: translateY(-.06em); }
 .mm { color: var(--fg); display: flex; } .mm .c { color: var(--fg); }
 .ss { display: flex; background: linear-gradient(180deg, #E4EDFF 0%, #A9C2F7 38%, #7298E9 62%, #4F78D6 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.word { font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -0.035em; line-height: .9; font-size: .62em; align-self: center; padding: .1em 0; }
+.word { font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -0.03em; line-height: .95; font-size: .42em; align-self: center; padding: .12em 0; white-space: normal; text-wrap: balance; max-width: 7.2em; }
 .rail { display: flex; gap: calc(var(--u) * .08); margin: calc(var(--u) * .2) 0 0 calc(var(--u) * .45); max-width: calc(var(--u) * 3.3); }
 .rail div { flex: 1; padding-top: calc(var(--u) * .07); border-top: 3px solid var(--line); font-weight: 700; font-size: calc(var(--u) * .105); letter-spacing: .1em; text-transform: uppercase; color: var(--soft); opacity: .7; transition: all .4s; white-space: nowrap; }
 .rail div.done { border-color: var(--blue-lo); } .rail div.on { border-color: var(--ice); color: var(--fg); opacity: 1; }
@@ -85,6 +85,8 @@ body.up .rail div.on { border-color: var(--blue-lo); }
 .ask .opts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; } .ask .opts span { border: 1.5px solid rgba(11,27,51,.35); padding: 4px 10px; font-weight: 700; font-size: .88em; }
 .ask .more { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(11,27,51,.14); } .ask .more h3 { margin: 0; font-size: 1.05em; font-weight: 800; }
 
+.ident { position: fixed; inset: 0; z-index: 7; display: none; place-items: center; text-align: center; padding: 6vmin; background: linear-gradient(180deg, #9DB8F2, var(--blue) 55%, var(--blue-lo)); color: var(--navy); font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -.03em; line-height: .95; font-size: clamp(40px, 13vmin, 150px); text-wrap: balance; }
+body.ident .ident { display: grid; }
 .reader { position: fixed; inset: 0; z-index: 5; display: none; place-items: center; padding: 6vmin; background: rgba(4,10,24,.82); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .reader.open { display: grid; } .reader .card { width: min(900px, 100%); max-height: 100%; overflow-y: auto; font-size: clamp(19px, 3.1vmin, 30px); padding: 1.4em 1.5em; animation-duration: .3s; }
 .reader .thread { padding: 0; } .reader .card.new::after { display: none; }
@@ -116,6 +118,7 @@ body.up .rail div.on { border-color: var(--blue-lo); }
   <aside class="feed" id="feed" hidden></aside>
 </main>
 <div class="reader" id="reader"></div>
+<div class="ident" id="ident"></div>
 <div class="pick" id="pick"></div>
 <script>
 const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -154,9 +157,10 @@ function tick() {
   if (!v) return;
   const b = document.body.classList, live = !!v.phase;
   const ms = !live ? 0 : v.running ? v.endsAt - (Date.now() + offset) : v.remainingMs, s = Math.max(0, Math.ceil(ms / 1000));
+  b.toggle('ident', (v.identifyUntil || 0) > Date.now() + offset); $('ident').textContent = v.role ? v.role.name : v.team.name;
   b.toggle('standby', !live); b.toggle('paused', live && !v.running && ms > 0); b.toggle('up', live && ms <= 0); b.toggle('last', live && v.running && ms > 0 && ms <= 60000);
   const d = (n) => String(n).padStart(2, '0').split('').map((c) => `<span>${c}</span>`).join('');
-  const html = live ? `<div class="mm">${d(Math.floor(s / 60))}<span class="c">:</span></div><div class="ss">${d(s % 60)}</div>` : `<div class="word">${esc(v.day.name)}</div>`;
+  const html = live ? `<div class="mm">${d(Math.floor(s / 60))}<span class="c">:</span></div><div class="ss">${d(s % 60)}</div>` : `<div class="word">${esc(v.role ? v.role.name : v.team.name)}</div>`;
   if ($('digits').dataset.h !== html) { $('digits').dataset.h = html; $('digits').innerHTML = html; }
   $('bar').style.height = (live && v.durationMs ? Math.max(0, Math.min(1, ms / v.durationMs)) * 100 : 100) + '%';
 }
@@ -172,7 +176,7 @@ document.addEventListener('click', (e) => {
 let lock = null; const wake = async () => { try { if (!lock && navigator.wakeLock) { lock = await navigator.wakeLock.request('screen'); lock.onrelease = () => lock = null; } } catch {} };
 document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); }); wake();
 
-// joining: pick a table, then a role (or the whole table). The seat is remembered on the device; tap the table's name to change it.
+// joining: pick a table, then a role (or the whole table). The seat is remembered on the device; hold the table's name for three seconds to change it.
 const store = { get: (k) => { try { return localStorage.getItem(k) || ''; } catch { return ''; } }, set: (k, x) => { try { localStorage.setItem(k, x); } catch {} } };
 const pick = (html) => { $('pick').innerHTML = html; $('pick').classList.add('open'); };
 const seatURL = (t, r) => `play?team=${encodeURIComponent(t)}${r ? '&role=' + encodeURIComponent(r) : ''}`;
@@ -206,7 +210,10 @@ function connect() {
   if (!team) { const saved = store.get('aigi-seat'); if (saved && !Q.has('pick')) location.replace(saved); else chooser(t); return; }
   store.set('aigi-seat', 'play' + location.search); last = Date.now(); connect();
   setInterval(() => { if (Date.now() - last > 25000) { document.body.classList.add('offline'); last = Date.now(); connect(); } }, 5000); // a silent connection is a dead one
-  $('team').onclick = (e) => { e.stopPropagation(); if (confirm('Change this device to another table or role?')) location.href = 'play?pick=1'; };
+  let press = 0; const up = () => clearTimeout(press);   // locked to its seat: only a three-second press on the table's name offers to change it
+  $('team').addEventListener('pointerdown', () => { press = setTimeout(() => { if (confirm('Change this device to another table?')) location.href = 'play?pick=1'; }, 3000); });
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) $('team').addEventListener(ev, up);
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
 })();
 </script>
 </body></html>

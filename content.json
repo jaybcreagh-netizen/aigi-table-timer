@@ -1,5 +1,5 @@
 {
- "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. Teams, roles and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES: statements and Wednesday's four posts are word for word from the Google Doc 'AI GI Scripts:' (read 2026-11-15). Questions, roles, the intelligence note and Friday's updates come from docs/story-flow-proposal.json and docs/flow-review.html, which are proposals: confirm before the day.",
+ "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. 'run' is each day's run sheet in order: a step starts a phase, sends an item, records the decision ('decision': the day's first question and its options), or is a cue the game master just ticks off. 'by' + 'versions' on a cue name the version to play for an earlier day's decision; 'when' shows a step only for that decision. Items not in 'run' sit under More. Teams and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES: statements and Wednesday's four posts are word for word from the Google Doc 'AI GI Scripts:' (read 2026-11-15). Questions, roles, the intelligence note and Friday's updates come from docs/story-flow-proposal.json and docs/flow-review.html, which are proposals: confirm before the day.",
  "title": "AI Global Initiative: Exercise 001",
  "phases": [
   { "id": "prepare", "name": "Prepare", "minutes": 10 },
@@ -7,20 +7,24 @@
   { "id": "decide", "name": "Decide", "minutes": 10 }
  ],
  "teams": [
-  { "id": "gov", "name": "Government", "roles": [
-    { "id": "chair", "name": "Chair" }, { "id": "treasury", "name": "Treasury" }, { "id": "comms", "name": "Head of communications" },
-    { "id": "intel", "name": "Intelligence analyst" }, { "id": "aisi", "name": "AI Security Institute" },
-    { "id": "science", "name": "Science minister" }, { "id": "nhs", "name": "NHS England lead" } ] },
-  { "id": "meridian", "name": "Meridian", "roles": [
-    { "id": "mer-uk", "name": "UK lead" }, { "id": "mer-eng", "name": "Head of incident engineering" }, { "id": "mer-safety", "name": "Head of safety" } ] },
-  { "id": "infra", "name": "Infrastructure and services", "roles": [
-    { "id": "calder-site", "name": "Calder site director" }, { "id": "calder-ceo", "name": "Calder chief executive" },
-    { "id": "harbour", "name": "Harbour, European director" }, { "id": "payguard", "name": "PayGuard" }, { "id": "rowan", "name": "Rowan Health" } ] },
-  { "id": "intl", "name": "International", "roles": [ { "id": "us-embassy", "name": "US Embassy" } ] }
+  { "id": "gov", "name": "Government" },
+  { "id": "meridian", "name": "Meridian" },
+  { "id": "infra", "name": "Infrastructure and services" },
+  { "id": "intl", "name": "International" }
  ],
  "days": [
   {
    "id": "d1", "name": "Monday",
+   "run": [
+    { "cue": "Main screen: Monday opening bulletin" },
+    { "phase": "prepare" },
+    { "phase": "discuss" },
+    { "cue": "Main screen: breaking news insert" },
+    { "send": "meridian-statement" },
+    { "send": "intel-note" },
+    { "phase": "decide" },
+    { "decision": true }
+   ],
    "questions": [
     { "q": "How hard does Calder pull the plug?", "opts": ["Restart", "Isolate the machines", "Cut the site off"] },
     { "q": "What does the government say?" }
@@ -34,6 +38,19 @@
   },
   {
    "id": "d2", "name": "Wednesday",
+   "run": [
+    { "cue": "Main screen: Wednesday opening bulletin", "by": "d1", "versions": { "Restart": "Option A", "Isolate the machines": "Option B", "Cut the site off": "Option C" } },
+    { "send": "meridian-offer" },
+    { "phase": "prepare" },
+    { "phase": "discuss" },
+    { "cue": "Main screen: social media insert" },
+    { "send": "leak-friday" },
+    { "send": "leak-hunter" },
+    { "send": "emptying-accounts" },
+    { "send": "queue" },
+    { "phase": "decide" },
+    { "decision": true }
+   ],
    "questions": [
     { "q": "Do we let Meridian’s hunter in?", "opts": ["Fully", "On our terms", "No"] },
     { "q": "What does Meridian give in return?", "opts": ["Hold its next model", "Open its logs to AISI", "Pay for the damage", "Stay out of live systems"] },
@@ -54,16 +71,28 @@
   },
   {
    "id": "d3", "name": "Friday",
+   "run": [
+    { "cue": "Main screen: Friday opening bulletin", "by": "d2", "versions": { "Fully": "Hunter Full Access", "On our terms": "On Our Terms", "No": "No" } },
+    { "phase": "prepare" },
+    { "phase": "discuss" },
+    { "send": "mid-fully", "when": { "d2": "Fully" } },
+    { "send": "mid-terms", "when": { "d2": "On our terms" } },
+    { "send": "mid-no", "when": { "d2": "No" } },
+    { "cue": "Main screen: breaking news insert" },
+    { "phase": "decide" },
+    { "decision": true },
+    { "cue": "Main screen: one year later", "by": "d3", "versions": { "Meridian’s hunter": "Meridian Runs It", "Britain": "Britain Runs It" } }
+   ],
    "questions": [
     { "q": "Who finishes the job?", "opts": ["Meridian’s hunter", "Britain"] },
     { "q": "What do we give Washington?", "opts": ["The evidence", "Some of it", "Nothing yet"] }
    ],
    "items": [
-    { "id": "mid-fully", "type": "note", "title": "Mid-round · if Fully", "label": "Update",
+    { "id": "mid-fully", "type": "note", "title": "Mid-round update (Fully)", "label": "Update",
       "text": "The hunter’s own accounts let the agents in." },
-    { "id": "mid-terms", "type": "note", "title": "Mid-round · if On our terms", "label": "Update",
+    { "id": "mid-terms", "type": "note", "title": "Mid-round update (On our terms)", "label": "Update",
       "text": "Harbour has found jobs the hunter missed. Meridian is asking for live access." },
-    { "id": "mid-no", "type": "note", "title": "Mid-round · if No", "label": "Update",
+    { "id": "mid-no", "type": "note", "title": "Mid-round update (No)", "label": "Update",
       "text": "Hospitals are demanding a faster response. One lab is ready for a limited restart." }
    ]
   }

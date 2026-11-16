@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // AIGI table timer. One small server, no dependencies.
 //   node table/server.js          prints the links
-//   /        portal            /play   participants (pick a table, then a role)            /gm   game master (needs the key)
-// Env: PORT (2424), AIGI_KEY (game master key; otherwise one is made and kept), AIGI_STATE (where state.json lives, e.g. a mounted volume).
+//   /        portal            /play   participants (pick a table, then a role)            /gm   game master
+// Env: PORT (2424), AIGI_KEY (game master key; with none set, /gm is open), AIGI_STATE (where state.json lives, e.g. a mounted volume).
 // The clock is a phase and an end time, so every device counts down by itself and keeps time if the connection drops.
 // Each device is sent only the items addressed to everyone, its table or its role.
 // Tables, roles, minutes and the participant code are edited by the game master and kept in state.json; content.json seeds them
@@ -17,11 +17,11 @@ fs.watchFile(path.join(DIR, 'content.json'), { interval: 1000 }, () => { try { c
 
 const seedSetup = () => ({ teams: content.teams.map((t) => ({ id: t.id, name: t.name, roles: (t.roles || []).map((r) => ({ ...r })) })),
   minutes: Object.fromEntries(content.phases.map((p) => [p.id, p.minutes])), joinCode: '' });
-const fresh = () => ({ day: content.days[0].id, phase: null, running: false, endsAt: 0, remainingMs: 0, durationMs: 0, sent: [], setup: seedSetup() });
+const fresh = () => ({ day: content.days[0].id, phase: null, running: false, endsAt: 0, remainingMs: 0, durationMs: 0, sent: [], step: {}, decisions: {}, identifyUntil: 0, setup: seedSetup() });
 let state = fresh();
 try { const s = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); state = Object.assign(fresh(), s); if (!s.setup) state.setup = seedSetup(); } catch {}
-const KEY = process.env.AIGI_KEY || (state.key && state.key.length >= 8 ? state.key : crypto.randomBytes(5).toString('hex'));
-state.key = KEY;
+const KEY = process.env.AIGI_KEY || '';   // no key unless one is set: fine in the room, set one before hosting it on a public address
+delete state.key;
 let saveT = null;
 const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { fs.writeFileSync(STATE_FILE + '.tmp', JSON.stringify(state, null, 1)); fs.renameSync(STATE_FILE + '.tmp', STATE_FILE); } catch (e) { console.error('save: ' + e.message); } }, 150); };
 
@@ -44,11 +44,11 @@ function tableView(teamId, roleId) {
     return item && { ...item, to: undefined, key: s.key, at: s.at, only: s.to === 'all' ? '' : s.to === team.id ? team.name : role.name };
   }).filter(Boolean).reverse();
   return { now: Date.now(), title: content.title, team: { id: team.id, name: team.name }, role: role && { id: role.id, name: role.name }, day: { id: d.id, name: d.name },
-    phases: phases(), ...timer(), questions: state.phase === 'decide' ? d.questions : [], feed };
+    phases: phases(), ...timer(), identifyUntil: state.identifyUntil, questions: state.phase === 'decide' ? d.questions : [], feed };
 }
 function controlView() {
   const counts = {}; for (const c of clients) if (!c.control) { counts[c.team] = (counts[c.team] || 0) + 1; if (c.role) counts[c.role] = (counts[c.role] || 0) + 1; }
-  return { now: Date.now(), title: content.title, setup: S(), days: content.days, phases: phases(), day: state.day, ...timer(), sent: state.sent, counts };
+  return { now: Date.now(), title: content.title, setup: S(), days: content.days, phases: phases(), day: state.day, step: state.step[state.day] || 0, decisions: state.decisions, ...timer(), sent: state.sent, counts };
 }
 
 const clients = new Set();
@@ -69,6 +69,13 @@ const commands = {
     else state.remainingMs = Math.max(0, state.remainingMs + ms);
     state.durationMs = Math.max(state.durationMs + ms, state.running ? state.endsAt - Date.now() : state.remainingMs); },
   end: clearClock,
+  // the run sheet: each day's steps in order (content.json 'run'). A step starts a phase, sends an item, records the day's decision, or is a cue that is only ticked off.
+  step({ i }) { const run = day().run || [], s = run[i]; if (!s) return; if (s.phase) commands.start({ phase: s.phase }); else if (s.send) commands.send({ id: s.send, to: s.to }); state.step[state.day] = i + 1; },
+  // the room's decision for the day: picks which bulletin version and which follow-up items the later days show
+  decide({ i, choice }) { const q = (day().questions || [])[0]; if (!q || !(q.opts || []).includes(choice)) return; state.decisions[state.day] = choice; if (Number.isInteger(i)) state.step[state.day] = i + 1; },
+  undecide() { delete state.decisions[state.day]; },
+  stepBack() { state.step[state.day] = Math.max(0, (state.step[state.day] || 0) - 1); },
+  identify() { state.identifyUntil = Date.now() + 12000; },
   // briefing
   send({ id, to }) { const item = day().items.find((i) => i.id === id); if (!item) return; to = to || item.to || 'all';
     const key = `${state.day}:${id}:${to}`; if (!state.sent.some((s) => s.key === key)) state.sent.push({ key, day: state.day, id, to, at: Date.now() }); },
@@ -84,12 +91,13 @@ const commands = {
   roleRemove({ id }) { for (const t of S().teams) t.roles = t.roles.filter((r) => r.id !== id); },
   joinCode({ code }) { S().joinCode = clean(code, 20); },
   setupDefaults() { const joinCode = S().joinCode; state.setup = { ...seedSetup(), joinCode }; },
-  reset() { state = Object.assign(fresh(), { key: KEY, setup: state.setup }); },
+  reset() { state = Object.assign(fresh(), { setup: state.setup }); },
 };
 
 // game master key, with a brake on guessing
 const bad = new Map();
 function keyOK(req, u) {
+  if (!KEY) return true;
   const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress, now = Date.now(), b = bad.get(ip);
   if (b && now - b.t < 60000 && b.n >= 8) return null;
   const k = String(req.headers['x-key'] || u.searchParams.get('key') || '');
@@ -137,6 +145,6 @@ server.listen(PORT, '0.0.0.0', () => {
   const ips = Object.values(os.networkInterfaces()).flat().filter((i) => i.family === 'IPv4' && !i.internal).map((i) => i.address);
   console.log(`\nAIGI table timer\n`);
   for (const h of ips.length ? ips : ['localhost']) console.log(`  Portal        http://${h}:${PORT}/\n  Participants  http://${h}:${PORT}/play\n  Game master   http://${h}:${PORT}/gm\n`);
-  console.log(`  Game master key: ${KEY}\n`);
+  console.log(KEY ? `  Game master key: ${KEY}\n` : `  No game master key set (AIGI_KEY). Anyone with the address can open /gm.\n`);
   save();
 });
