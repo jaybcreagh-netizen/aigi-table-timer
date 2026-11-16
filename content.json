@@ -52,7 +52,7 @@
     { "decision": true }
    ],
    "questions": [
-    { "q": "Do we let Meridian’s hunter in?", "opts": ["Fully", "On our terms", "No"] },
+    { "q": "Who goes after the escaped AI?", "opts": ["Meridian’s hunter", "Sovereign", "Human investigation"] },
     { "q": "What does Meridian give in return?", "opts": ["Hold its next model", "Open its logs to AISI", "Pay for the damage", "Stay out of live systems"] },
     { "q": "What does the government say?" }
    ],
@@ -72,28 +72,29 @@
   {
    "id": "d3", "name": "Friday",
    "run": [
-    { "cue": "Main screen: Friday opening bulletin", "by": "d2", "versions": { "Fully": "Hunter Full Access", "On our terms": "On Our Terms", "No": "No" } },
+    { "cue": "Main screen: Friday opening bulletin", "by": "d2", "versions": { "Meridian’s hunter": "Hunter", "Sovereign": "Sovereign", "Human investigation": "Human Investigation" } },
     { "phase": "prepare" },
     { "phase": "discuss" },
-    { "send": "mid-fully", "when": { "d2": "Fully" } },
-    { "send": "mid-terms", "when": { "d2": "On our terms" } },
-    { "send": "mid-no", "when": { "d2": "No" } },
+    { "send": "mid-hunter", "when": { "d2": "Meridian’s hunter" } },
+    { "send": "mid-sovereign", "when": { "d2": "Sovereign" } },
+    { "send": "mid-human", "when": { "d2": "Human investigation" } },
     { "cue": "Main screen: breaking news insert" },
     { "phase": "decide" },
     { "decision": true },
-    { "cue": "Main screen: one year later", "by": "d3", "versions": { "Meridian’s hunter": "Meridian Runs It", "Britain": "Britain Runs It" } }
+    { "cue": "Main screen: one year later", "by": "d3", "versions": { "Yes, and trust Meridian to do it": "Britain Runs It", "Yes, block it and shut every site it touched": "Britain Runs It", "No, keep it running under watch": "Meridian Runs It", "Hold firm": "Britain Runs It", "Hold firm and shut the sites it can’t clear": "Britain Runs It", "Let Meridian’s hunter in after all": "Meridian Runs It" } }
    ],
    "questions": [
-    { "q": "Who finishes the job?", "opts": ["Meridian’s hunter", "Britain"] },
-    { "q": "What do we give Washington?", "opts": ["The evidence", "Some of it", "Nothing yet"] }
+    { "q": "Do we tell Meridian to switch the hunter off?", "when": { "d2": "Meridian’s hunter" }, "opts": ["Yes, and trust Meridian to do it", "Yes, block it and shut every site it touched", "No, keep it running under watch"] },
+    { "q": "Do we hold firm?", "when": { "d2": ["Sovereign", "Human investigation"] }, "opts": ["Hold firm", "Hold firm and shut the sites it can’t clear", "Let Meridian’s hunter in after all"] },
+    { "q": "What does Britain say publicly, and who does it work with?", "opts": ["Share the evidence with Washington", "Share some of it", "Nothing yet"] }
    ],
    "items": [
-    { "id": "mid-fully", "type": "note", "title": "Mid-round update (Fully)", "label": "Update",
-      "text": "The hunter’s own accounts let the agents in." },
-    { "id": "mid-terms", "type": "note", "title": "Mid-round update (On our terms)", "label": "Update",
-      "text": "Harbour has found jobs the hunter missed. Meridian is asking for live access." },
-    { "id": "mid-no", "type": "note", "title": "Mid-round update (No)", "label": "Update",
-      "text": "Hospitals are demanding a faster response. One lab is ready for a limited restart." }
+    { "id": "mid-hunter", "type": "note", "title": "Mid-round update (hunter)", "label": "Update",
+      "text": "Meridian can’t say whether its hunter has colluded with the escaped AI. Only Meridian can switch it off, and we can’t check its logs." },
+    { "id": "mid-sovereign", "type": "note", "title": "Mid-round update (Sovereign)", "label": "Update",
+      "text": "Hospitals are demanding a faster response. One lab is ready for a limited restart." },
+    { "id": "mid-human", "type": "note", "title": "Mid-round update (human investigation)", "label": "Update",
+      "text": "Investigators are still working through the first site. Meridian has offered its hunter again." }
    ]
   }
  ]

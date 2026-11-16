@@ -34,6 +34,9 @@ const newId = (name) => { const used = new Set(['all', ...S().teams.map((t) => t
   const base = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || 'seat'; let id = base, n = 2; while (used.has(id)) id = `${base}-${n++}`; return id; };
 const clean = (s, max = 60) => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
+// a question with 'when' is asked only after that earlier decision (a value, or a list of values); the first question asked is the one recorded
+const fits = (when) => !when || Object.entries(when).every(([d, c]) => [].concat(c).includes(state.decisions[d]));
+const asked = (d) => (d.questions || []).filter((q) => fits(q.when));
 // what one device is allowed to see
 function tableView(teamId, roleId) {
   const team = S().teams.find((t) => t.id === teamId);
@@ -44,7 +47,7 @@ function tableView(teamId, roleId) {
     return item && { ...item, to: undefined, key: s.key, at: s.at, only: s.to === 'all' ? '' : s.to === team.id ? team.name : role.name };
   }).filter(Boolean).reverse();
   return { now: Date.now(), title: content.title, team: { id: team.id, name: team.name }, role: role && { id: role.id, name: role.name }, day: { id: d.id, name: d.name },
-    phases: phases(), ...timer(), identifyUntil: state.identifyUntil, questions: state.phase === 'decide' ? d.questions : [], feed };
+    phases: phases(), ...timer(), identifyUntil: state.identifyUntil, questions: state.phase === 'decide' ? asked(d) : [], feed };
 }
 function controlView() {
   const counts = {}; for (const c of clients) if (!c.control) { counts[c.team] = (counts[c.team] || 0) + 1; if (c.role) counts[c.role] = (counts[c.role] || 0) + 1; }
@@ -72,7 +75,7 @@ const commands = {
   // the run sheet: each day's steps in order (content.json 'run'). A step starts a phase, sends an item, records the day's decision, or is a cue that is only ticked off.
   step({ i }) { const run = day().run || [], s = run[i]; if (!s) return; if (s.phase) commands.start({ phase: s.phase }); else if (s.send) commands.send({ id: s.send, to: s.to }); state.step[state.day] = i + 1; },
   // the room's decision for the day: picks which bulletin version and which follow-up items the later days show
-  decide({ i, choice }) { const q = (day().questions || [])[0]; if (!q || !(q.opts || []).includes(choice)) return; state.decisions[state.day] = choice; if (Number.isInteger(i)) state.step[state.day] = i + 1; },
+  decide({ i, choice }) { const q = asked(day())[0]; if (!q || !(q.opts || []).includes(choice)) return; state.decisions[state.day] = choice; if (Number.isInteger(i)) state.step[state.day] = i + 1; },
   undecide() { delete state.decisions[state.day]; },
   stepBack() { state.step[state.day] = Math.max(0, (state.step[state.day] || 0) - 1); },
   identify() { state.identifyUntil = Date.now() + 12000; },

@@ -97,13 +97,15 @@ const sentKey = (id, to) => `${v.day}:${id}:${to}`, isSent = (id, to) => v.sent.
 // a step in words: what the big button and the list say
 const dayName = (id) => (v.days.find((d) => d.id === id) || {}).name || id;
 // a step tied to an earlier decision shows only for that decision; until the decision is recorded it shows, marked "if ..."
-const visible = (s) => !s.when || Object.entries(s.when).every(([d, c]) => !v.decisions[d] || v.decisions[d] === c);
+const visible = (s) => !s.when || Object.entries(s.when).every(([d, c]) => !v.decisions[d] || [].concat(c).includes(v.decisions[d]));
+// the day's recorded question: the first one whose 'when' fits the decisions so far
+const firstQ = () => today().questions.find((q) => !q.when || Object.entries(q.when).every(([d, c]) => [].concat(c).includes(v.decisions[d]))) || today().questions[0];
 const nextIdx = () => { const r = run(); let i = v.step; while (i < r.length && !visible(r[i])) i++; return i; };
 function stepText(s) {
-  const iff = s.when ? Object.entries(s.when).filter(([d]) => !v.decisions[d]).map(([, c]) => 'if ' + c).join(', ') : '';
+  const iff = s.when ? Object.entries(s.when).filter(([d]) => !v.decisions[d]).map(([, c]) => 'if ' + [].concat(c).join(' or ')).join(', ') : '';
   if (s.phase) { const p = v.phases.find((x) => x.id === s.phase); return { kind: 'Start', title: p.name, sub: `${p.minutes} min` }; }
   if (s.send) { const it = today().items.find((x) => x.id === s.send) || { title: s.send }; return { kind: 'Send', title: it.title, sub: [seatName(s.to || it.to || 'all'), iff].filter(Boolean).join(' · ') }; }
-  if (s.decision) { const q = today().questions[0]; return { kind: 'Decision', title: q.q, sub: v.decisions[v.day] || '', opts: q.opts || [] }; }
+  if (s.decision) { const q = firstQ(); return { kind: 'Decision', title: q.q, sub: v.decisions[v.day] || '', opts: q.opts || [] }; }
   let sub = iff; if (s.by) { const c = v.decisions[s.by]; sub = c ? `${(s.versions || {})[c] || c} · ${dayName(s.by)}: ${c}` : `Version depends on ${dayName(s.by)}'s decision, which isn't recorded`; }
   return { kind: 'Cue', title: s.cue, sub };
 }
