@@ -23,13 +23,15 @@ It prints the links.
 
 Before the first phase a tablet shows its table's name. Then the phase and the clock. Items arrive beside the clock; tap one to read it full screen. At Decide the day's questions appear. The last minute pulses, and at zero the screen turns white.
 
+When the run reaches a **Show figures** step, a background board appears under the clock: up to six of the day's figures, one or two lines for that table only, and a slow ticker of share prices along the bottom. The figures follow the decisions recorded so far and update again in the afternoon. At the same step each table also gets a card of figures only it can see, at the top of its briefing column. Which figures are invented, and what each leans on, is in `FIGURES-DRAFT.md`.
+
 A tablet stays on its table: hold the table's name for three seconds to change it. A device is only ever sent items addressed to everyone, its table or its role.
 
 ## Content
 
 `content.json` holds the days, each day's run sheet (`run`), the Decide questions and the items that can be sent. Save it and the server reloads. Its teams, roles and minutes are only the starting list: once the game master changes them on Setup, the live copy is in `state.json`.
 
-What's there now: the statements and Wednesday's four posts are word for word from the current script. The questions, the intelligence note, Friday's updates and the order of each run sheet come from the story-flow proposal and still need confirming.
+What's there now (21 Nov): names, facts and film numbers follow the reads as shot on 19 Nov. A cue names the film to play ("Film 05 · D2 B", "Ending 1D + 2A + 3B"). Posts and leaks are copied from `data/social.json`; items marked `"draft": true` are wording the script only describes and still need approving. The Decide questions are the 17 Nov ones with the names changed. Friday's two outcome steps (the next model release, evidence sharing) are recorded by the game master only and are not shown on tablets; they and the choice-to-ending map are a reading of the films and need confirming.
 
 ## Hosting it on a domain
 

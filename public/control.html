@@ -105,8 +105,10 @@ function stepText(s) {
   const iff = s.when ? Object.entries(s.when).filter(([d]) => !v.decisions[d]).map(([, c]) => 'if ' + [].concat(c).join(' or ')).join(', ') : '';
   if (s.phase) { const p = v.phases.find((x) => x.id === s.phase); return { kind: 'Start', title: p.name, sub: `${p.minutes} min` }; }
   if (s.send) { const it = today().items.find((x) => x.id === s.send) || { title: s.send }; return { kind: 'Send', title: it.title, sub: [seatName(s.to || it.to || 'all'), iff].filter(Boolean).join(' · ') }; }
-  if (s.decision) { const q = firstQ(); return { kind: 'Decision', title: q.q, sub: v.decisions[v.day] || '', opts: q.opts || [] }; }
-  let sub = iff; if (s.by) { const c = v.decisions[s.by]; sub = c ? `${(s.versions || {})[c] || c} · ${dayName(s.by)}: ${c}` : `Version depends on ${dayName(s.by)}'s decision, which isn't recorded`; }
+  if (s.board) return { kind: 'Show', title: s.title || 'Background figures', sub: 'Every table' };
+  if (s.decision) { const own = typeof s.decision === 'string', q = own ? s : firstQ(), key = own ? s.decision : v.day; return { kind: 'Decision', title: q.q, sub: v.decisions[key] || '', opts: q.opts || [], key }; }
+  let sub = iff; if (s.by) { const parts = [s].concat(s.also || []).map((p) => { const c = v.decisions[p.by]; return c ? (p.versions || {})[c] || c : ''; }), c = v.decisions[s.by];   // 'also' adds more parts to the film's name
+    sub = parts.every(Boolean) ? parts.join(' + ') + (s.also ? '' : ` · ${dayName(s.by)}: ${c}`) : parts.some(Boolean) ? parts.map((x) => x || '?').join(' + ') + ' · a decision isn’t recorded' : `Depends on ${dayName(s.by)}'s decision, which isn't recorded`; }
   return { kind: 'Cue', title: s.cue, sub };
 }
 
@@ -132,7 +134,7 @@ function render() {
   $('days').innerHTML = v.days.map((d) => `<button data-day="${d.id}" class="${d.id === v.day ? 'on' : ''}">${esc(d.name)}</button>`).join('');
   const ni = nextIdx(), ci = choosing >= 0 ? choosing : (steps[ni] && steps[ni].decision ? ni : -1), s = steps[ni], t = s && stepText(s);
   $('choose').hidden = ci < 0; $('next').hidden = ci >= 0;
-  if (ci >= 0) { const q = stepText(steps[ci]); $('choose').innerHTML = `<small>Decision</small><b>${esc(q.title)}</b><div>${q.opts.map((o) => `<button data-choice="${esc(o)}" data-at="${ci}" class="${v.decisions[v.day] === o ? 'on' : ''}">${esc(o)}</button>`).join('')}</div>`; }
+  if (ci >= 0) { const q = stepText(steps[ci]); $('choose').innerHTML = `<small>Decision</small><b>${esc(q.title)}</b><div>${q.opts.map((o) => `<button data-choice="${esc(o)}" data-at="${ci}" class="${v.decisions[q.key] === o ? 'on' : ''}">${esc(o)}</button>`).join('')}</div>`; }
   $('next').innerHTML = t ? `<small>Next · ${t.kind}</small><b>${esc(t.title)}</b>${t.sub ? `<span>${esc(t.sub)}</span>` : ''}`
     : nextDay ? `<small>${esc(day.name)} is done</small><b>Go to ${esc(nextDay.name)}</b>` : `<small>${esc(day.name)} is done</small><b>That's the last step</b>`;
   $('next').disabled = Date.now() < hold || (!t && !nextDay);
@@ -177,7 +179,7 @@ document.addEventListener('click', (e) => {
   else if (b.id === 'next') { hold = Date.now() + 1500; b.disabled = true;   // a double tap must not run two steps
     if (run()[nextIdx()]) cmd('step', { i: nextIdx() }); else { const n = v.days[v.days.findIndex((x) => x.id === v.day) + 1]; const left = v.phase && (v.running ? v.endsAt - (Date.now() + offset) : v.remainingMs) > 0;
       if (n && (!left || confirm(`The clock is still running. Go to ${n.name} anyway?`))) cmd('day', { day: n.id }); } }
-  else if (d.choice) { if (Date.now() < hold) return; hold = Date.now() + 1500; const at = +d.at; choosing = -1; cmd('decide', { i: at >= v.step ? at : undefined, choice: d.choice }); }
+  else if (d.choice) { if (Date.now() < hold) return; hold = Date.now() + 1500; const at = +d.at; choosing = -1; cmd('decide', { i: at, choice: d.choice }); }
   else if (d.step && run()[+d.step].decision) { choosing = choosing === +d.step ? -1 : +d.step; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   else if (d.step) { const i = +d.step, t = stepText(run()[i]); if (i === nextIdx() || confirm(`${i < v.step ? 'Do this again' : 'Skip ahead'}: ${t.kind === 'Cue' ? '' : t.kind + ' '}${t.title}?`)) cmd('step', { i }); }
   else if (b.id === 'back') cmd('stepBack');
