@@ -41,7 +41,6 @@
   {
    "id": "d1", "name": "Monday", "background": "",
    "run": [
-    { "cue": "Main screen: Sunday evening film", "film": "f01" },
     { "cue": "Main screen: Monday opening bulletin", "film": "f02" },
     { "phase": "prepare" },
     { "phase": "discuss" },
