@@ -1,5 +1,5 @@
 {
- "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. 'run' is each day's run sheet in order: a step starts a phase, sends an item, records the decision ('decision': the day's first question and its options), or is a cue the game master just ticks off. 'by' + 'versions' on a cue name the version to play for an earlier day's decision; 'when' shows a step only for that decision. Items not in 'run' sit under More. Teams and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES: statements and Wednesday's four posts are word for word from the Google Doc 'AI GI Scripts:' (read 2026-11-15). Questions, roles, the intelligence note and Friday's updates come from docs/story-flow-proposal.json and docs/flow-review.html, which are proposals: confirm before the day.",
+ "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. 'run' is each day's run sheet in order: a step starts a phase, sends an item, records the decision ('decision': the day's first question and its options), or is a cue the game master just ticks off. 'by' + 'versions' on a cue name the version to play for an earlier day's decision; a cue with 'film' (one film), 'films' (one per earlier decision) or 'pick' (the game master chooses) also starts that film on the observer page (/watch) when the game master taps it; 'films' at the top lists every film: 'video' is its Bunny Stream id, 'seconds' its length; 'about' and each day's 'background' are plain text shown to observers between films; 'when' shows a step only for that decision. Items not in 'run' sit under More. Teams and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES: statements and Wednesday's four posts are word for word from the Google Doc 'AI GI Scripts:' (read 2026-11-15). Questions, roles, the intelligence note and Friday's updates come from docs/story-flow-proposal.json and docs/flow-review.html, which are proposals: confirm before the day.",
  "title": "AI Global Initiative: Exercise 001",
  "phases": [
   { "id": "prepare", "name": "Prepare", "minutes": 10 },
@@ -12,14 +12,40 @@
   { "id": "infra", "name": "Infrastructure and services" },
   { "id": "intl", "name": "International" }
  ],
+ "about": "A tabletop exercise played in one room over three days of the story: Monday, Wednesday and Friday. Each day the tables prepare, discuss, then decide. This page plays each film as it is shown in the room, then shows where the game is.",
+ "films": {
+  "embed": "https://iframe.mediadelivery.net/embed/816973/",
+  "list": {
+   "f01": { "name": "FILM 01 D0 - Sunday evening", "video": "f82fed04-fd7d-4398-9f7a-fa1bc06271a5", "seconds": 110 },
+   "f02": { "name": "FILM 02 D1 - Monday morning", "video": "4fa4be82-6afe-45d4-aeae-065e67a7ea4b", "seconds": 75 },
+   "f03": { "name": "FILM 03 D1 Insert - Monday afternoon (breaking)", "video": "7a26254d-065a-4e2a-bfa7-afdaf47313c2", "seconds": 79 },
+   "f04": { "name": "FILM 04 D2 A - Wednesday morning (900 postponed)", "video": "27d8f0ee-4bf5-418f-9660-007180ec8e6b", "seconds": 79 },
+   "f05": { "name": "FILM 05 D2 B - Wednesday morning (500 postponed)", "video": "c2980335-372c-456a-bdff-71f0425d38f4", "seconds": 79 },
+   "f06": { "name": "FILM 06 D2 C - Wednesday morning (nearly 500 postponed)", "video": "2fa2a985-90a4-465b-861e-fa96d167e709", "seconds": 82 },
+   "f07": { "name": "FILM 07 D2 Insert - Wednesday afternoon (breaking)", "video": "86111728-eff8-4d30-a157-0779da258bd8", "seconds": 69 },
+   "f08": { "name": "FILM 08 D3 Hunter access - Friday morning", "video": "9ee6fe3c-d29f-42b9-95bd-00564efe1692", "seconds": 64 },
+   "f09": { "name": "FILM 09 D3 Sovereign - Friday morning", "video": "e530e910-9770-4d8d-a39c-32ec352acd89", "seconds": 57 },
+   "f10": { "name": "FILM 10 D3 British oversight - Friday morning", "video": "353fcde9-26f8-48d5-8aaf-93e7c7e5ef96", "seconds": 51 },
+   "f11": { "name": "FILM 11 D3 Insert - Friday afternoon (breaking)", "video": "8fa93985-0249-4d40-b308-ab67ba54e341", "seconds": 52 },
+   "f12": { "name": "FILM 12 END 1A - Hunter kept", "video": "1557948f-4790-4aac-a7d3-9564ad4fa813", "seconds": 72 },
+   "f13": { "name": "FILM 13 END 1B - Hunter then Sovereign", "video": "14b5b448-3c54-419b-9756-86efb7541823", "seconds": 84 },
+   "f14": { "name": "FILM 14 END 1C - Sovereign kept", "video": "4ca0b2f1-fca0-44e1-bf00-35296c4f6f97", "seconds": 80 },
+   "f15": { "name": "FILM 15 END 1D - Sovereign then Hunter", "video": "ba91dfbc-775c-4337-b183-37aea7a218d5", "seconds": 89 },
+   "f16": { "name": "FILM 16 CLIP 2A - Release postponed", "video": "e0768f34-f239-4c8c-89b7-8a5575deba96", "seconds": 8 },
+   "f17": { "name": "FILM 17 CLIP 2B - Release on schedule", "video": "6ad0ceaf-12f5-476e-bcb9-cace1fc8b330", "seconds": 7 },
+   "f18": { "name": "FILM 18 CLIP 3A - Joint investigation agreed", "video": "caa01225-e8c3-4160-a758-25b595410e39", "seconds": 12 },
+   "f19": { "name": "FILM 19 CLIP 3B - Talks, no agreement", "video": "6171a126-ecbf-499a-986b-5fb1f9768191", "seconds": 10 }
+  }
+ },
  "days": [
   {
-   "id": "d1", "name": "Monday",
+   "id": "d1", "name": "Monday", "background": "",
    "run": [
-    { "cue": "Main screen: Monday opening bulletin" },
+    { "cue": "Main screen: Sunday evening film", "film": "f01" },
+    { "cue": "Main screen: Monday opening bulletin", "film": "f02" },
     { "phase": "prepare" },
     { "phase": "discuss" },
-    { "cue": "Main screen: breaking news insert" },
+    { "cue": "Main screen: breaking news insert", "film": "f03" },
     { "send": "meridian-statement" },
     { "send": "intel-note" },
     { "phase": "decide" },
@@ -37,13 +63,14 @@
    ]
   },
   {
-   "id": "d2", "name": "Wednesday",
+   "id": "d2", "name": "Wednesday", "background": "",
    "run": [
-    { "cue": "Main screen: Wednesday opening bulletin", "by": "d1", "versions": { "Restart": "Option A", "Isolate the machines": "Option B", "Cut the site off": "Option C" } },
+    { "cue": "Main screen: Wednesday opening bulletin", "by": "d1", "versions": { "Restart": "Option A", "Isolate the machines": "Option B", "Cut the site off": "Option C" },
+      "films": { "Restart": "f04", "Isolate the machines": "f05", "Cut the site off": "f06" } },
     { "send": "meridian-offer" },
     { "phase": "prepare" },
     { "phase": "discuss" },
-    { "cue": "Main screen: social media insert" },
+    { "cue": "Main screen: social media insert", "film": "f07" },
     { "send": "leak-friday" },
     { "send": "leak-hunter" },
     { "send": "emptying-accounts" },
@@ -70,18 +97,21 @@
    ]
   },
   {
-   "id": "d3", "name": "Friday",
+   "id": "d3", "name": "Friday", "background": "",
    "run": [
-    { "cue": "Main screen: Friday opening bulletin", "by": "d2", "versions": { "Fully": "Hunter Full Access", "On our terms": "On Our Terms", "No": "No" } },
+    { "cue": "Main screen: Friday opening bulletin", "by": "d2", "versions": { "Fully": "Hunter Full Access", "On our terms": "On Our Terms", "No": "No" },
+      "films": { "Fully": "f08", "On our terms": "f10", "No": "f09" } },
     { "phase": "prepare" },
     { "phase": "discuss" },
     { "send": "mid-fully", "when": { "d2": "Fully" } },
     { "send": "mid-terms", "when": { "d2": "On our terms" } },
     { "send": "mid-no", "when": { "d2": "No" } },
-    { "cue": "Main screen: breaking news insert" },
+    { "cue": "Main screen: breaking news insert", "film": "f11" },
     { "phase": "decide" },
     { "decision": true },
-    { "cue": "Main screen: one year later", "by": "d3", "versions": { "Meridian’s hunter": "Meridian Runs It", "Britain": "Britain Runs It" } }
+    { "cue": "Main screen: ending", "pick": ["f12", "f13", "f14", "f15"] },
+    { "cue": "Main screen: ending clip 2", "pick": ["f16", "f17"] },
+    { "cue": "Main screen: ending clip 3", "pick": ["f18", "f19"] }
    ],
    "questions": [
     { "q": "Who finishes the job?", "opts": ["Meridian’s hunter", "Britain"] },

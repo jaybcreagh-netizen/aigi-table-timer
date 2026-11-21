@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 // AIGI table timer. One small server, no dependencies.
 //   node table/server.js          prints the links
-//   /        portal            /play   participants (pick a table, then a role)            /gm   game master
+//   /        portal            /play   participants (pick a table, then a role)            /gm   game master            /watch   observers
 // Env: PORT (2424), AIGI_KEY (game master key; with none set, /gm is open), AIGI_STATE (where state.json lives, e.g. a mounted volume).
 // The clock is a phase and an end time, so every device counts down by itself and keeps time if the connection drops.
 // Each device is sent only the items addressed to everyone, its table or its role.
+// A film is an id and a start time, the same idea as the clock: an observer who joins late lands at the right point in it.
 // Tables, roles, minutes and the participant code are edited by the game master and kept in state.json; content.json seeds them
 // and holds the days, questions and items.
 const http = require('http'), fs = require('fs'), path = require('path'), os = require('os'), crypto = require('crypto');
@@ -17,7 +18,7 @@ fs.watchFile(path.join(DIR, 'content.json'), { interval: 1000 }, () => { try { c
 
 const seedSetup = () => ({ teams: content.teams.map((t) => ({ id: t.id, name: t.name, roles: (t.roles || []).map((r) => ({ ...r })) })),
   minutes: Object.fromEntries(content.phases.map((p) => [p.id, p.minutes])), joinCode: '' });
-const fresh = () => ({ day: content.days[0].id, phase: null, running: false, endsAt: 0, remainingMs: 0, durationMs: 0, sent: [], step: {}, decisions: {}, identifyUntil: 0, setup: seedSetup() });
+const fresh = () => ({ day: content.days[0].id, phase: null, running: false, endsAt: 0, remainingMs: 0, durationMs: 0, sent: [], step: {}, decisions: {}, film: null, identifyUntil: 0, setup: seedSetup() });
 let state = fresh();
 try { const s = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); state = Object.assign(fresh(), s); if (!s.setup) state.setup = seedSetup(); } catch {}
 const KEY = process.env.AIGI_KEY || '';   // no key unless one is set: fine in the room, set one before hosting it on a public address
@@ -46,20 +47,33 @@ function tableView(teamId, roleId) {
   return { now: Date.now(), title: content.title, team: { id: team.id, name: team.name }, role: role && { id: role.id, name: role.name }, day: { id: d.id, name: d.name },
     phases: phases(), ...timer(), identifyUntil: state.identifyUntil, questions: state.phase === 'decide' ? d.questions : [], feed };
 }
+// what an observer sees: the film playing now (only that one, never the versions the room didn't pick), the clock, and what went to everyone
+const filmList = () => (content.films && content.films.list) || {};
+function watchView() {
+  const d = day(), f = state.film && filmList()[state.film.id];
+  const feed = state.sent.filter((s) => s.day === d.id && s.to === 'all').map((s) => {
+    const item = s.note ? { type: 'note', text: s.note } : d.items.find((i) => i.id === s.id);
+    return item && { ...item, to: undefined, key: s.key, at: s.at };
+  }).filter(Boolean).reverse();
+  const decided = content.days.filter((x) => state.decisions[x.id]).map((x) => ({ day: x.name, q: ((x.questions || [])[0] || {}).q || '', choice: state.decisions[x.id] }));
+  return { now: Date.now(), title: content.title, about: content.about || '', day: { id: d.id, name: d.name, background: d.background || '' }, days: content.days.map((x) => ({ id: x.id, name: x.name })),
+    tables: S().teams.map((t) => t.name), phases: phases(), ...timer(), questions: state.phase === 'decide' ? d.questions : [], decided, feed,
+    film: f ? { src: content.films.embed + f.video, at: state.film.at, seconds: f.seconds } : null };
+}
 function controlView() {
-  const counts = {}; for (const c of clients) if (!c.control) { counts[c.team] = (counts[c.team] || 0) + 1; if (c.role) counts[c.role] = (counts[c.role] || 0) + 1; }
-  return { now: Date.now(), title: content.title, setup: S(), days: content.days, phases: phases(), day: state.day, step: state.step[state.day] || 0, decisions: state.decisions, ...timer(), sent: state.sent, counts };
+  const counts = {}; let watching = 0; for (const c of clients) if (c.watch) watching++; else if (!c.control) { counts[c.team] = (counts[c.team] || 0) + 1; if (c.role) counts[c.role] = (counts[c.role] || 0) + 1; }
+  return { now: Date.now(), title: content.title, setup: S(), days: content.days, phases: phases(), day: state.day, step: state.step[state.day] || 0, decisions: state.decisions, ...timer(), sent: state.sent, counts, watching, films: filmList(), film: state.film };
 }
 
 const clients = new Set();
-const push = (c) => c.res.write(`data: ${JSON.stringify(c.control ? controlView() : tableView(c.team, c.role))}\n\n`);
+const push = (c) => c.res.write(`data: ${JSON.stringify(c.control ? controlView() : c.watch ? watchView() : tableView(c.team, c.role))}\n\n`);
 function broadcast() { for (const c of clients) push(c); }
 setInterval(broadcast, 10000); // heartbeat: keeps the connection open and the clocks in step
 
 const clearClock = () => Object.assign(state, { phase: null, running: false, endsAt: 0, remainingMs: 0, durationMs: 0 });
 const commands = {
   // the clock
-  day({ day: id }) { if (content.days.some((d) => d.id === id)) { state.day = id; clearClock(); } },
+  day({ day: id }) { if (content.days.some((d) => d.id === id)) { state.day = id; state.film = null; clearClock(); } },
   start({ phase }) { const p = phases().find((x) => x.id === phase); if (!p) return; const ms = p.minutes * 60000;
     Object.assign(state, { phase, running: true, endsAt: Date.now() + ms, remainingMs: ms, durationMs: ms }); },
   pause() { if (!state.phase || !state.running) return; state.remainingMs = Math.max(0, state.endsAt - Date.now()); state.running = false; },
@@ -70,7 +84,12 @@ const commands = {
     state.durationMs = Math.max(state.durationMs + ms, state.running ? state.endsAt - Date.now() : state.remainingMs); },
   end: clearClock,
   // the run sheet: each day's steps in order (content.json 'run'). A step starts a phase, sends an item, records the day's decision, or is a cue that is only ticked off.
-  step({ i }) { const run = day().run || [], s = run[i]; if (!s) return; if (s.phase) commands.start({ phase: s.phase }); else if (s.send) commands.send({ id: s.send, to: s.to }); state.step[state.day] = i + 1; },
+  // A film cue also starts its film for observers: 'film' is the one film, 'films' the version for an earlier day's decision, 'pick' (or 'films' with no decision recorded) the one the game master tapped.
+  step({ i, film }) { const run = day().run || [], s = run[i]; if (!s) return; if (s.phase) commands.start({ phase: s.phase }); else if (s.send) commands.send({ id: s.send, to: s.to });
+    const options = s.pick || Object.values(s.films || {}), id = s.film || (s.films && s.films[state.decisions[s.by]]) || (options.includes(film) ? film : null);
+    if (id) commands.film({ id }); state.step[state.day] = i + 1; },
+  film({ id }) { if (filmList()[id]) state.film = { id, at: Date.now() }; },
+  filmStop() { state.film = null; },
   // the room's decision for the day: picks which bulletin version and which follow-up items the later days show
   decide({ i, choice }) { const q = (day().questions || [])[0]; if (!q || !(q.opts || []).includes(choice)) return; state.decisions[state.day] = choice; if (Number.isInteger(i)) state.step[state.day] = i + 1; },
   undecide() { delete state.decisions[state.day]; },
@@ -112,10 +131,10 @@ const deny = (res, ok) => { res.writeHead(ok === null ? 429 : 403); res.end(); }
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
   if (u.pathname === '/events') {
-    const control = u.searchParams.has('control');
-    if (control) { const ok = keyOK(req, u); if (!ok) return deny(res, ok); } else if (!codeOK(u)) return deny(res, false);
+    const control = u.searchParams.has('control'), watch = !control && u.searchParams.has('watch');
+    if (control) { const ok = keyOK(req, u); if (!ok) return deny(res, ok); } else if (!watch && !codeOK(u)) return deny(res, false);
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
-    const c = { res, control, team: u.searchParams.get('team'), role: u.searchParams.get('role') };
+    const c = { res, control, watch, team: u.searchParams.get('team'), role: u.searchParams.get('role') };
     clients.add(c); push(c); if (!control) broadcast();
     req.on('close', () => { clients.delete(c); broadcast(); });
     return;
@@ -130,7 +149,7 @@ const server = http.createServer((req, res) => {
     return;
   }
   if (u.pathname === '/control' || (u.pathname === '/' && u.searchParams.has('team'))) { res.writeHead(302, { Location: (u.pathname === '/' ? '/play' : '/gm') + u.search }); return res.end(); }
-  const page = { '/': '/index.html', '/play': '/table.html', '/gm': '/control.html' }[u.pathname] || u.pathname;
+  const page = { '/': '/index.html', '/play': '/table.html', '/gm': '/control.html', '/watch': '/watch.html' }[u.pathname] || u.pathname;
   const file = path.join(PUB, path.normalize(page));
   if (!file.startsWith(PUB + path.sep)) { res.writeHead(403); return res.end(); }
   fs.readFile(file, (err, buf) => {
@@ -144,7 +163,7 @@ server.on('error', (e) => { console.error(e.code === 'EADDRINUSE' ? `Port ${PORT
 server.listen(PORT, '0.0.0.0', () => {
   const ips = Object.values(os.networkInterfaces()).flat().filter((i) => i.family === 'IPv4' && !i.internal).map((i) => i.address);
   console.log(`\nAIGI table timer\n`);
-  for (const h of ips.length ? ips : ['localhost']) console.log(`  Portal        http://${h}:${PORT}/\n  Participants  http://${h}:${PORT}/play\n  Game master   http://${h}:${PORT}/gm\n`);
+  for (const h of ips.length ? ips : ['localhost']) console.log(`  Portal        http://${h}:${PORT}/\n  Participants  http://${h}:${PORT}/play\n  Game master   http://${h}:${PORT}/gm\n  Observers     http://${h}:${PORT}/watch\n`);
   console.log(KEY ? `  Game master key: ${KEY}\n` : `  No game master key set (AIGI_KEY). Anyone with the address can open /gm.\n`);
   save();
 });

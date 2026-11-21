@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1B33"><meta name="robots" content="noindex">
+<title>Observer · AI Global Initiative: Exercise 001</title>
+<!-- AIGI observer screen. /watch. For people following the room on Zoom: it plays each film in full quality when the game master
+     taps that film's cue, then shows where the game is: the clock, what has been decided, and what went to every table.
+     The server sends the film and the time it started, so someone who joins late lands at the right point in it.
+     The films are on Bunny Stream and play in Bunny's own player (an iframe), steered with player.js messages: ready, play, setCurrentTime, ended.
+     A browser only lets a film start with sound after the person has tapped the page, hence the join screen. -->
+<style>
+@font-face { font-family: "Schibsted Grotesk"; font-weight: 400 900; src: url("fonts/schibsted-grotesk-latin-wght-normal.woff2") format("woff2"); }
+@font-face { font-family: "ArchivoV"; font-weight: 100 900; font-stretch: 62% 125%; src: url("fonts/archivo-latin-wdth-normal.woff2") format("woff2"); }
+:root { --navy: #0B1B33; --navy-hi: #14294B; --deep: #061022; --blue: #7298E9; --blue-hi: #9DB8F2; --blue-lo: #4F78D6; --ice: #CFE0FF;
+  --fg: #fff; --soft: rgba(207,224,255,.62); --line: rgba(114,152,233,.28); --pad: clamp(16px, 3.2vmin, 40px); }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--deep); color: var(--fg); font-family: "Schibsted Grotesk", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+body { display: flex; flex-direction: column; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+
+.bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(120% 90% at 30% 40%, var(--navy-hi) 0%, var(--navy) 45%, var(--deep) 100%); overflow: hidden; }
+.bg img { position: absolute; left: 50%; top: 50%; width: max(150vw, 190vh); transform: translate(-46%, -47%); opacity: .2; }
+.bg i { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--blue) 30%, var(--ice) 50%, var(--blue) 70%, transparent); opacity: .35; }
+.bg i.a { top: 21%; } .bg i.b { bottom: 17%; opacity: .2; }
+
+header { position: relative; z-index: 1; display: flex; align-items: baseline; gap: 14px; padding: var(--pad) var(--pad) 0; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: clamp(12px, 1.9vmin, 20px); }
+header .who { color: var(--fg); } header .day { color: var(--blue); }
+header .conn { margin-left: auto; align-self: center; width: 8px; height: 8px; border-radius: 50%; background: #F2B134; opacity: 0; transition: opacity .3s; }
+body.offline header .conn { opacity: 1; }
+
+main { position: relative; z-index: 1; flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, 1fr); gap: var(--pad); padding: var(--pad); }
+
+/* the clock, set like the tablets' */
+.stage { container-type: size; display: flex; flex-direction: column; justify-content: center; min-height: 0; min-width: 0; }
+.stage > * { --u: min(24cqw, 44cqh); }
+.phase { font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--blue); font-size: calc(var(--u) * .2); margin: 0 0 calc(var(--u) * .12) calc(var(--u) * .45); min-height: 1.2em; }
+.clock { display: flex; align-items: stretch; gap: calc(var(--u) * .32); font-size: var(--u); }
+.bar { width: .13em; flex: none; position: relative; background: rgba(114,152,233,.16); }
+.bar b { position: absolute; left: 0; right: 0; bottom: 0; height: 100%; background: linear-gradient(180deg, #E4EDFF, var(--blue)); transition: height .25s linear; }
+.digits { font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -0.035em; line-height: .82; display: flex; align-items: baseline; padding: .06em 0 .02em; white-space: nowrap; }
+.digits span { display: inline-block; width: .685em; text-align: center; } .digits span.c { width: .3em; transform: translateY(-.06em); }
+.mm { display: flex; } .ss { display: flex; background: linear-gradient(180deg, #E4EDFF 0%, #A9C2F7 38%, #7298E9 62%, #4F78D6 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.word { font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -0.03em; line-height: .95; font-size: .42em; align-self: center; padding: .12em 0; }
+.rail { display: flex; gap: calc(var(--u) * .08); margin: calc(var(--u) * .2) 0 0 calc(var(--u) * .45); max-width: calc(var(--u) * 3.3); }
+.rail div { flex: 1; padding-top: calc(var(--u) * .07); border-top: 3px solid var(--line); font-weight: 700; font-size: calc(var(--u) * .105); letter-spacing: .1em; text-transform: uppercase; color: var(--soft); opacity: .7; white-space: nowrap; }
+.rail div.done { border-color: var(--blue-lo); } .rail div.on { border-color: var(--ice); color: var(--fg); opacity: 1; }
+.now { margin: calc(var(--u) * .22) 0 0 calc(var(--u) * .45); font-size: clamp(15px, calc(var(--u) * .13), 26px); font-weight: 600; color: var(--ice); min-height: 1.4em; }
+body.standby .phase, body.standby .bar b { opacity: 0; } body.paused .digits, body.paused .bar b { opacity: .45; }
+
+/* where the game is */
+.feed { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 2px 2px 40px; scrollbar-width: none; }
+.feed::-webkit-scrollbar { display: none; }
+.feed h3 { margin: 10px 2px -4px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); font-weight: 800; }
+.card { position: relative; flex: none; padding: 18px 20px 20px; font-size: 16px; line-height: 1.38; box-shadow: 0 14px 36px rgba(2,8,20,.45); }
+.eyebrow { font-weight: 800; font-size: .72em; letter-spacing: .14em; text-transform: uppercase; }
+.statement, .info { color: #fff; background: linear-gradient(180deg, rgba(20,41,75,.94), rgba(11,27,51,.97)); border-top: 3px solid var(--blue); box-shadow: 0 14px 36px rgba(2,8,20,.5), inset 0 1px 0 rgba(207,224,255,.22); }
+.statement .eyebrow, .info .eyebrow { color: var(--blue); } .statement .who { font-weight: 800; font-size: 1.2em; margin-top: 6px; }
+.statement .rule { height: 2px; margin: 12px 0 13px; background: linear-gradient(90deg, #7298E9, #CFE0FF 40%, rgba(114,152,233,0)); }
+.statement .q { font-weight: 700; font-size: 1.12em; line-height: 1.3; } .statement .q div + div { margin-top: .55em; }
+.info p { margin: 8px 0 0; color: var(--ice); } .info .row { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); } .info .row:first-of-type { border: 0; padding-top: 0; margin-top: 8px; }
+.info .row small { display: block; color: var(--soft); font-size: .86em; } .info .row b { display: block; font-size: 1.15em; margin-top: 2px; }
+.post, .thread { background: #fff; color: #0B1B33; border-radius: 3px; }
+.post .top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; } .post .av { width: 2.4em; height: 2.4em; border-radius: 50%; background: #5B6B8C; color: #fff; display: grid; place-items: center; font-weight: 800; font-size: .85em; flex: none; }
+.post .name { font-weight: 800; line-height: 1.15; } .post .meta { font-size: .8em; color: #6B7280; } .post .text { font-size: 1.08em; white-space: pre-line; } .post .stats { margin-top: 10px; font-size: .78em; color: #6B7280; }
+.thread { padding: 0; overflow: hidden; } .thread .src { background: #1B2333; color: #fff; padding: 9px 20px; font-weight: 800; font-size: .7em; letter-spacing: .14em; text-transform: uppercase; }
+.thread .msgs { padding: 12px 20px 4px; } .thread .m { margin-bottom: 11px; } .thread .m b { font-size: .86em; } .thread .m b span { font-weight: 500; color: #6B7280; margin-left: 6px; } .thread .m p { margin: 1px 0 0; }
+.thread .foot { padding: 0 20px 14px; font-size: .76em; color: #6B7280; }
+.note { color: var(--navy); background: linear-gradient(180deg, var(--blue-hi), var(--blue) 55%, var(--blue-lo)); }
+.note .eyebrow { opacity: .8; } .note .text { font-weight: 800; font-size: 1.25em; line-height: 1.25; margin-top: 6px; white-space: pre-line; }
+.ask { color: #0B1B33; background: linear-gradient(180deg, #FFFFFF 0%, #F2F5FB 55%, #E1E8F5 100%); border-left: 6px solid var(--blue-lo); }
+.ask .eyebrow { color: #23479E; } .ask h2 { font-size: 1.55em; line-height: 1.12; letter-spacing: -.01em; margin: 6px 0 0; font-weight: 800; }
+.ask .opts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; } .ask .opts span { border: 1.5px solid rgba(11,27,51,.35); padding: 4px 10px; font-weight: 700; font-size: .88em; }
+.ask .more { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(11,27,51,.14); } .ask .more h3 { margin: 0; font-size: 1.05em; font-weight: 800; color: inherit; letter-spacing: 0; text-transform: none; }
+
+/* the film: over everything, black */
+.film { position: fixed; inset: 0; z-index: 8; display: none; background: #000; }
+body.showing .film { display: block; } .film iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.film .hide { position: absolute; z-index: 2; right: max(12px, env(safe-area-inset-right)); top: max(12px, env(safe-area-inset-top)); padding: 8px 14px; border-radius: 99px; background: rgba(6,16,34,.7); color: var(--ice); font-weight: 700; font-size: 13px; opacity: .55; }
+.film .hide:hover { opacity: 1; }
+.film .hint { position: absolute; z-index: 2; left: 50%; top: max(14px, env(safe-area-inset-top)); transform: translateX(-50%); max-width: calc(100% - 180px); padding: 9px 16px; border-radius: 99px; background: #F2B134; color: #15120A; font-weight: 800; font-size: 14px; text-align: center; pointer-events: none; }
+.film .hint:empty { display: none; }
+
+/* joining: one tap, so films can start with sound */
+.join { position: fixed; inset: 0; z-index: 9; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 28px; text-align: center; background: radial-gradient(120% 90% at 30% 40%, var(--navy-hi) 0%, var(--navy) 45%, var(--deep) 100%); }
+body:not(.joined) .join { display: flex; }
+.join h1 { font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -.03em; font-size: clamp(28px, 6vmin, 52px); margin: 0; line-height: 1; }
+.join h2 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); margin: 0; font-weight: 800; }
+.join p { max-width: 460px; margin: 6px 0 0; color: var(--ice); font-size: 17px; line-height: 1.45; } .join p.small { color: var(--soft); font-size: 14px; }
+.join button { margin-top: 14px; width: min(420px, 100%); padding: 20px 22px; font-weight: 800; font-size: 22px; color: var(--navy); background: linear-gradient(180deg, #9DB8F2, var(--blue) 55%, var(--blue-lo)); }
+
+@media (orientation: portrait), (max-width: 760px) {
+  html, body { height: auto; min-height: 100%; overflow: visible; }
+  main { grid-template-columns: 1fr; } .stage { container-type: inline-size; padding: 3vh 0 1vh; } .stage > * { --u: 20cqw; } .feed { overflow: visible; }
+}
+</style></head>
+<body class="standby">
+<div class="bg"><img src="map.png" alt=""><i class="a"></i><i class="b"></i></div>
+<header><span class="who">Observer</span><span class="day" id="day"></span><span class="conn" title="Reconnecting"></span></header>
+<main>
+  <section class="stage">
+    <div class="phase" id="phase"></div>
+    <div class="clock"><div class="bar"><b id="bar"></b></div><div class="digits" id="digits"></div></div>
+    <div class="rail" id="rail"></div>
+    <div class="now" id="now"></div>
+  </section>
+  <aside class="feed" id="feed"></aside>
+</main>
+<div class="film" id="film"><button class="hide" id="hide">Hide film</button><div class="hint" id="hint"></div></div>
+<div class="join" id="join">
+  <h2>Observer</h2><h1 id="title">AI Global Initiative</h1>
+  <p id="joinmsg">This page plays each film in full quality as it is shown in the room. Between films it shows where the game is.</p>
+  <button id="go">Join with sound</button>
+  <p class="small">Keep Zoom open for the room. If you hear a film twice, mute Zoom until it ends.</p>
+</div>
+<script>
+const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let v = null, offset = 0, feedSig = '', joined = false;
+const serverNow = () => Date.now() + offset;
+
+const cardHTML = (it) => {
+  if (it.type === 'statement') return `<div class="card statement"><div class="eyebrow">${esc(it.label || 'Statement')}</div><div class="who">${esc(it.org)}</div><div class="rule"></div>
+    <div class="q">${it.text.map((t, i) => `<div>${it.quote && i === 0 ? '“' : ''}${esc(t)}${it.quote && i === it.text.length - 1 ? '”' : ''}</div>`).join('')}</div></div>`;
+  if (it.type === 'post') return `<div class="card post"><div class="top"><div class="av">${esc((it.author || '?').replace(/^@/, '').split(/[ _]/).map((w) => w[0]).slice(0, 2).join('').toUpperCase())}</div>
+    <div><div class="name">${esc(it.author)}</div><div class="meta">${esc([it.handle, it.time].filter(Boolean).join(' · '))}</div></div></div><div class="text">${esc(it.text)}</div>${it.stats ? `<div class="stats">${esc(it.stats)}</div>` : ''}</div>`;
+  if (it.type === 'thread') return `<div class="card thread"><div class="src">${esc(it.source || it.label)}</div><div class="msgs">${it.messages.map((m) => `<div class="m"><b>${esc(m.who)}<span>${esc(m.t)}</span></b><p>${esc(m.text)}</p></div>`).join('')}</div>${it.foot ? `<div class="foot">${esc(it.foot)}</div>` : ''}</div>`;
+  return `<div class="card note"><div class="eyebrow">${esc(it.label || 'Note')}</div><div class="text">${esc(it.text)}</div></div>`;
+};
+const opts = (q) => q.opts ? `<div class="opts">${q.opts.map((o) => `<span>${esc(o)}</span>`).join('')}</div>` : '';
+const askHTML = (qs) => !qs.length ? '' : `<div class="card ask"><div class="eyebrow">The room is deciding</div><h2>${esc(qs[0].q)}</h2>${opts(qs[0])}
+  ${qs.slice(1).map((q) => `<div class="more"><h3>${esc(q.q)}</h3>${opts(q)}</div>`).join('')}</div>`;
+const decidedHTML = (ds) => !ds.length ? '' : `<div class="card info"><div class="eyebrow">Decided so far</div>${ds.map((d) => `<div class="row"><small>${esc(d.day)} · ${esc(d.q)}</small><b>${esc(d.choice)}</b></div>`).join('')}</div>`;
+const aboutHTML = () => `<div class="card info"><div class="eyebrow">About this exercise</div>${v.about ? `<p>${esc(v.about)}</p>` : ''}${v.day.background ? `<p><b>${esc(v.day.name)}.</b> ${esc(v.day.background)}</p>` : ''}
+  ${v.tables.length ? `<p>The tables: ${esc(v.tables.join(', '))}.</p>` : ''}</div>`;
+
+function render() {
+  $('day').textContent = v.day.name; $('title').textContent = v.title; document.title = `Observer · ${v.title}`;
+  const idx = v.phases.findIndex((p) => p.id === v.phase);
+  $('phase').textContent = idx >= 0 ? v.phases[idx].name : '';
+  $('rail').innerHTML = v.phases.map((p, i) => `<div class="${i < idx ? 'done' : i === idx ? 'on' : ''}">${esc(p.name)}</div>`).join('');
+  const sig = JSON.stringify([v.questions, v.feed.map((f) => f.key), v.decided, v.day, v.about, v.tables]);
+  if (sig !== feedSig) { feedSig = sig;
+    $('feed').innerHTML = askHTML(v.questions) + decidedHTML(v.decided) + (v.feed.length ? `<h3>Sent to every table</h3>` + v.feed.map(cardHTML).join('') : '') + aboutHTML(); }
+  syncFilm(); tick();
+}
+function tick() {
+  if (!v) return;
+  const b = document.body.classList, live = !!v.phase, name = live ? (v.phases.find((p) => p.id === v.phase) || {}).name : '';
+  const ms = !live ? 0 : v.running ? v.endsAt - serverNow() : v.remainingMs, s = Math.max(0, Math.ceil(ms / 1000));
+  b.toggle('standby', !live); b.toggle('paused', live && !v.running && ms > 0);
+  const d = (n) => String(n).padStart(2, '0').split('').map((c) => `<span>${c}</span>`).join('');
+  const html = live ? `<div class="mm">${d(Math.floor(s / 60))}<span class="c">:</span></div><div class="ss">${d(s % 60)}</div>` : `<div class="word">${esc(v.day.name)}</div>`;
+  if ($('digits').dataset.h !== html) { $('digits').dataset.h = html; $('digits').innerHTML = html; }
+  $('bar').style.height = (live && v.durationMs ? Math.max(0, Math.min(1, ms / v.durationMs)) * 100 : 100) + '%';
+  $('now').textContent = Date.now() - endedAt < 45000 ? 'The film has ended. Back to the room on Zoom.'
+    : !live ? 'Between stages. The next film plays here when it starts in the room.' : ms <= 0 ? `Time is up on ${name}.` : v.running ? `The tables are in ${name}.` : `${name} is paused.`;
+  const f = v.film, playingNow = f && (serverNow() - f.at) / 1000 < f.seconds - 1;
+  if (!joined) $('joinmsg').textContent = playingNow ? 'A film is playing in the room now. Join to watch it from this point.' : 'This page plays each film in full quality as it is shown in the room. Between films it shows where the game is.';
+  syncFilm();
+}
+setInterval(tick, 250);
+
+// ---- the film ----
+// v.film is { src, at, seconds }: Bunny's player address, the server time the game master started it, and its length.
+let film = null, frame = null, st = null, done = 0, endedAt = 0, readyT = 0, hintT = 0;
+const pos = (f) => (serverNow() - f.at) / 1000;                       // where the film should be right now, in seconds
+const say = (method, value) => { try { frame.contentWindow.postMessage(JSON.stringify({ context: 'player.js', version: '0.0.11', method, value, listener: method === 'addEventListener' ? 'aigi-' + value : undefined }), new URL(film.src).origin); } catch {} };
+function syncFilm() {
+  const f = v && v.film;
+  if (film && (!f || f.at !== film.at)) closeFilm();                  // stopped, or another film started
+  if (f && joined && !film && done !== f.at && pos(f) < f.seconds - 1) openFilm(f);
+  if (film) { const over = pos(film) - film.seconds, moving = st.playing && Date.now() - st.heard < 3000;
+    if ((over > 3 && !moving) || over > 90) endFilm(); }                // it never started, or it is long past its end
+}
+function openFilm(f) {
+  film = f; st = { ready: false, played: false, playing: false, heard: 0, seeks: 0, sought: 0 };
+  const from = Math.floor(pos(f));
+  frame = document.createElement('iframe'); frame.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture'; frame.allowFullscreen = true; frame.title = 'Film';
+  frame.src = `${f.src}?autoplay=true&muted=false&loop=false&preload=true&rememberPosition=false${from > 1 ? '&t=' + from : ''}`;
+  $('film').prepend(frame); $('hint').textContent = ''; document.body.classList.add("showing");
+  readyT = setInterval(() => say('addEventListener', 'ready'), 400);   // ask until the player answers
+  hintT = setTimeout(() => { if (film === f && !st.played) $('hint').textContent = st.ready ? 'Tap the film to start it' : 'The film is not loading here. Watch it on Zoom.'; }, 6000);
+}
+function closeFilm() { clearInterval(readyT); clearTimeout(hintT); if (frame) frame.remove(); frame = film = st = null; document.body.classList.remove("showing"); }
+function endFilm() { done = film.at; endedAt = Date.now(); closeFilm(); }
+function catchUp() {                                                    // put the film where it should be: after a late start, a pause, or a stall
+  const want = pos(film); if (want >= film.seconds - 1 || st.seeks >= 4 || Date.now() - st.sought < 4000) return;
+  st.seeks++; st.sought = Date.now(); say('setCurrentTime', want + .3);
+}
+addEventListener('message', (e) => {
+  if (!frame || e.source !== frame.contentWindow) return;
+  let m = e.data; if (typeof m === 'string') { try { m = JSON.parse(m); } catch { return; } }
+  if (!m || m.context !== 'player.js') return;
+  if (m.event === 'ready' && !st.ready) { st.ready = true; clearInterval(readyT);
+    for (const ev of ['play', 'pause', 'ended', 'timeupdate', 'error']) say('addEventListener', ev);
+    say('play'); }
+  else if (m.event === 'play') { st.playing = true; st.heard = Date.now(); if (!st.played) { st.played = true; $('hint').textContent = ''; } }
+  else if (m.event === 'pause') st.playing = false;
+  else if (m.event === 'timeupdate') { st.heard = Date.now(); const at = m.value && m.value.seconds; if (st.playing && Number.isFinite(at) && Math.abs(pos(film) - at) > 2) catchUp(); }
+  else if (m.event === 'ended') endFilm();
+});
+$('hide').onclick = () => { done = film.at; closeFilm(); };
+$('go').onclick = () => { joined = true; document.body.classList.add('joined'); wake(); syncFilm(); };
+
+let lock = null; const wake = async () => { try { if (!lock && navigator.wakeLock) { lock = await navigator.wakeLock.request('screen'); lock.onrelease = () => lock = null; } } catch {} };
+document.addEventListener('visibilitychange', () => { if (!document.hidden && joined) wake(); });
+
+let es = null, last = Date.now();
+function connect() {
+  if (es) es.close();
+  es = new EventSource('events?watch=1');
+  es.onmessage = (m) => { v = JSON.parse(m.data); last = Date.now(); offset = v.now - Date.now(); document.body.classList.remove('offline'); render(); };
+  es.onerror = () => document.body.classList.add('offline');
+}
+connect();
+setInterval(() => { if (Date.now() - last > 25000) { document.body.classList.add('offline'); last = Date.now(); connect(); } }, 5000); // a silent connection is a dead one
+</script>
+</body></html>
