@@ -12,13 +12,13 @@ It prints the links.
 |---|---|---|
 | `/` | everyone | The portal: Participant or Game master |
 | `/play` | participants | Pick a table once; the device remembers it. Or open a table's own link from Setup |
-| `/watch` | observers | People following on Zoom: plays each film in full quality as it is shown in the room, then shows where the game is |
+| `/watch` | observers | A screen for the observers' monitor: plays each film in full quality as it is shown in the room, then shows where the game is |
 | `/gm` | game master | Open to anyone with the address, unless a key is set (`AIGI_KEY=... node table/server.js`) |
 
 ## Game master
 
 - **Run** is the day as a list, in order, with one big **Next** button: start a phase, send an item, or tick off a main-screen cue. After Decide the button becomes the day's choices: tap what the room decided. That answer names the bulletin version on the next day's cue ("Option B", "On Our Terms") and keeps only the follow-ups that fit. Tap the decision's line in the run sheet to change it. Tap any line in the run sheet to do it out of order (it asks first). Pause, −1 / +1 min and End act on the running clock. **Identify** makes every tablet show its table name for a few seconds. Anything not in the run sheet, and a box for typing a one-off note, sits under "More to send".
-- A **film cue** ("Main screen: ...") also starts that film on the observer page, so tap it as the film starts in the room. If the film has versions, the app picks the one that fits the recorded decision; if it can't tell, the button becomes the versions and you tap the one that played. **Observers** shows how many are watching, what is playing, and **Stop film**. "Play any film for observers" starts one out of order; FILM 01 (Sunday evening) is only there, because people get it before the exercise starts and it is not a step in Monday's run sheet.
+- A **film cue** ("Main screen: ...") also starts that film on the observer page, so tap it as the film starts in the room. If the film has versions, the app picks the one that fits the recorded decision; if it can't tell, the button becomes the versions and you tap the one that played. **Observers** shows how many are watching, what is playing, and **Stop film**. "Play any film for observers" starts one out of order; FILM 01 (Sunday evening) is only there, because people get it before the exercise starts and it is not a step in Monday's run sheet: play it from this list if the observers should see it on their monitor.
 - **Setup** has the minutes, the tables (add, rename, remove, each with its own link) and **Reset for the real run**.
 
 ## Participants
@@ -29,17 +29,18 @@ A tablet stays on its table: hold the table's name for three seconds to change i
 
 ## Observers
 
-`/watch` is for people who are not in the room. They keep Zoom open for the room and this page beside it.
+`/watch` goes on a monitor for the observers, beside the Zoom feed of the room. Zoom shows the room; this screen shows the films in full quality. Nobody needs to touch it during the game.
 
-- They tap **Join with sound** once. A browser will not start a film with sound until the person has tapped the page.
-- When the game master taps a film cue, the film plays full screen. The server sends the film and the time it started, so someone who joins late or reloads lands at the right point.
+- Open it in Chrome, full screen, and tap **Start with sound** once. A browser will not start a film with sound until someone has tapped the page. If the page is ever reloaded it needs that tap again.
+- When the game master taps a film cue, the film plays full screen. The server sends the film and the time it started, so a screen that is opened late or reloaded lands at the right point.
+- On a wide screen nothing scrolls and the text is sized to be read across a room: the newest things are at the top and the oldest fall off the bottom. On a person's own laptop or phone the same address works and scrolls.
 - When the film ends the page shows the day, the stage and its clock, what has been decided so far, the Decide questions (during Decide only, as on the tablets), and whatever went to every table. Items sent to one table or role are never sent to this page.
 - The page is only ever sent the film that is playing, never the versions the room didn't pick.
-- The room's sound reaches Zoom a little late, so an observer can hear a film twice. Whoever runs Zoom mutes the room microphone while a film plays, or observers mute Zoom.
+- Zoom also carries the room's sound, a little late, so observers can hear a film twice. Whoever looks after the observers' screens turns Zoom's sound down while a film plays, or the room microphone is muted for it.
 
-The films are on Bunny Stream and play in Bunny's player. **The Bunny library only plays inside sites on its allowed list**: in Bunny, Stream → the library → Security → Allowed domains, add the address this app is hosted on (no `https://`, for example `play.example.org`). Until that is done the observer page shows "The film is not loading here".
+The films are on Bunny Stream and play in Bunny's player. **The Bunny library only plays inside sites on its allowed list**: in Bunny, Stream → the library → Security → Allowed domains, add the address this app is hosted on (no `https://`, for example `play.example.org`). Until that is done the observer screen shows "The film is not loading on this screen".
 
-On iPhone, iPad and Safari the film may wait for one tap on its play button; the page asks for it, then jumps to the right point.
+Use Chrome on the monitor's computer. Safari, iPhones and iPads may make the film wait for a tap on its play button each time.
 
 ## Content
 

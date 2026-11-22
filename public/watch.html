@@ -3,11 +3,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0B1B33"><meta name="robots" content="noindex">
 <title>Observer · AI Global Initiative: Exercise 001</title>
-<!-- AIGI observer screen. /watch. For people following the room on Zoom: it plays each film in full quality when the game master
-     taps that film's cue, then shows where the game is: the clock, what has been decided, and what went to every table.
+<!-- AIGI observer screen. /watch. Made to sit on a monitor for the observers, beside the Zoom feed of the room, with nobody touching it:
+     it plays each film in full quality when the game master taps that film's cue, then shows where the game is: the clock, what has
+     been decided, and what went to every table. On a wide screen nothing scrolls and the text is sized to be read across a room;
+     the newest things are at the top and the oldest fall off the bottom. It also works on a person's own laptop or phone.
      The server sends the film and the time it started, so someone who joins late lands at the right point in it.
      The films are on Bunny Stream and play in Bunny's own player (an iframe), steered with player.js messages: ready, play, setCurrentTime, ended.
-     A browser only lets a film start with sound after the person has tapped the page, hence the join screen. -->
+     A browser only lets a film start with sound after someone has tapped the page, hence the one tap at the start (and again if the page is reloaded). -->
 <style>
 @font-face { font-family: "Schibsted Grotesk"; font-weight: 400 900; src: url("fonts/schibsted-grotesk-latin-wght-normal.woff2") format("woff2"); }
 @font-face { font-family: "ArchivoV"; font-weight: 100 900; font-stretch: 62% 125%; src: url("fonts/archivo-latin-wdth-normal.woff2") format("woff2"); }
@@ -44,14 +46,14 @@ main { position: relative; z-index: 1; flex: 1; min-height: 0; display: grid; gr
 .rail { display: flex; gap: calc(var(--u) * .08); margin: calc(var(--u) * .2) 0 0 calc(var(--u) * .45); max-width: calc(var(--u) * 3.3); }
 .rail div { flex: 1; padding-top: calc(var(--u) * .07); border-top: 3px solid var(--line); font-weight: 700; font-size: calc(var(--u) * .105); letter-spacing: .1em; text-transform: uppercase; color: var(--soft); opacity: .7; white-space: nowrap; }
 .rail div.done { border-color: var(--blue-lo); } .rail div.on { border-color: var(--ice); color: var(--fg); opacity: 1; }
-.now { margin: calc(var(--u) * .22) 0 0 calc(var(--u) * .45); font-size: clamp(15px, calc(var(--u) * .13), 26px); font-weight: 600; color: var(--ice); min-height: 1.4em; }
+.now { margin: calc(var(--u) * .22) 0 0 calc(var(--u) * .45); font-size: clamp(15px, calc(var(--u) * .13), 34px); font-weight: 600; color: var(--ice); min-height: 1.4em; }
 body.standby .phase, body.standby .bar b { opacity: 0; } body.paused .digits, body.paused .bar b { opacity: .45; }
 
 /* where the game is */
-.feed { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 2px 2px 40px; scrollbar-width: none; }
-.feed::-webkit-scrollbar { display: none; }
-.feed h3 { margin: 10px 2px -4px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); font-weight: 800; }
-.card { position: relative; flex: none; padding: 18px 20px 20px; font-size: 16px; line-height: 1.38; box-shadow: 0 14px 36px rgba(2,8,20,.45); }
+.feed { min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 14px; padding: 2px 2px 0; font-size: clamp(16px, 2.1vmin, 34px);
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 70px), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 70px), transparent); }
+.feed h3 { margin: 10px 2px -4px; font-size: .72em; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); font-weight: 800; }
+.card { position: relative; flex: none; padding: 1.1em 1.25em 1.25em; line-height: 1.38; box-shadow: 0 14px 36px rgba(2,8,20,.45); }
 .eyebrow { font-weight: 800; font-size: .72em; letter-spacing: .14em; text-transform: uppercase; }
 .statement, .info { color: #fff; background: linear-gradient(180deg, rgba(20,41,75,.94), rgba(11,27,51,.97)); border-top: 3px solid var(--blue); box-shadow: 0 14px 36px rgba(2,8,20,.5), inset 0 1px 0 rgba(207,224,255,.22); }
 .statement .eyebrow, .info .eyebrow { color: var(--blue); } .statement .who { font-weight: 800; font-size: 1.2em; margin-top: 6px; }
@@ -75,8 +77,8 @@ body.standby .phase, body.standby .bar b { opacity: 0; } body.paused .digits, bo
 /* the film: over everything, black */
 .film { position: fixed; inset: 0; z-index: 8; display: none; background: #000; }
 body.showing .film { display: block; } .film iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.film .hide { position: absolute; z-index: 2; right: max(12px, env(safe-area-inset-right)); top: max(12px, env(safe-area-inset-top)); padding: 8px 14px; border-radius: 99px; background: rgba(6,16,34,.7); color: var(--ice); font-weight: 700; font-size: 13px; opacity: .55; }
-.film .hide:hover { opacity: 1; }
+.film .hide { position: absolute; z-index: 2; right: max(12px, env(safe-area-inset-right)); top: max(12px, env(safe-area-inset-top)); padding: 8px 14px; border-radius: 99px; background: rgba(6,16,34,.7); color: var(--ice); font-weight: 700; font-size: 13px; opacity: 0; transition: opacity .2s; }
+.film .hide:hover, .film .hide:focus-visible { opacity: 1; }
 .film .hint { position: absolute; z-index: 2; left: 50%; top: max(14px, env(safe-area-inset-top)); transform: translateX(-50%); max-width: calc(100% - 180px); padding: 9px 16px; border-radius: 99px; background: #F2B134; color: #15120A; font-weight: 800; font-size: 14px; text-align: center; pointer-events: none; }
 .film .hint:empty { display: none; }
 
@@ -90,7 +92,8 @@ body:not(.joined) .join { display: flex; }
 
 @media (orientation: portrait), (max-width: 760px) {
   html, body { height: auto; min-height: 100%; overflow: visible; }
-  main { grid-template-columns: 1fr; } .stage { container-type: inline-size; padding: 3vh 0 1vh; } .stage > * { --u: 20cqw; } .feed { overflow: visible; }
+  main { grid-template-columns: 1fr; } .stage { container-type: inline-size; padding: 3vh 0 1vh; } .stage > * { --u: 20cqw; }
+  .feed { overflow: visible; padding-bottom: 40px; font-size: 16px; -webkit-mask-image: none; mask-image: none; }
 }
 </style></head>
 <body class="standby">
@@ -108,9 +111,9 @@ body:not(.joined) .join { display: flex; }
 <div class="film" id="film"><button class="hide" id="hide">Hide film</button><div class="hint" id="hint"></div></div>
 <div class="join" id="join">
   <h2>Observer</h2><h1 id="title">AI Global Initiative</h1>
-  <p id="joinmsg">This page plays each film in full quality as it is shown in the room. Between films it shows where the game is.</p>
-  <button id="go">Join with sound</button>
-  <p class="small">Keep Zoom open for the room. If you hear a film twice, mute Zoom until it ends.</p>
+  <p id="joinmsg">This screen plays each film as it is shown in the room. Between films it shows where the game is.</p>
+  <button id="go">Start with sound</button>
+  <p class="small">One tap, so films can play with sound. After that the screen runs by itself.</p>
 </div>
 <script>
 const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -151,10 +154,10 @@ function tick() {
   const html = live ? `<div class="mm">${d(Math.floor(s / 60))}<span class="c">:</span></div><div class="ss">${d(s % 60)}</div>` : `<div class="word">${esc(v.day.name)}</div>`;
   if ($('digits').dataset.h !== html) { $('digits').dataset.h = html; $('digits').innerHTML = html; }
   $('bar').style.height = (live && v.durationMs ? Math.max(0, Math.min(1, ms / v.durationMs)) * 100 : 100) + '%';
-  $('now').textContent = Date.now() - endedAt < 45000 ? 'The film has ended. Back to the room on Zoom.'
+  $('now').textContent = Date.now() - endedAt < 20000 ? 'The film has ended.'
     : !live ? 'Between stages. The next film plays here when it starts in the room.' : ms <= 0 ? `Time is up on ${name}.` : v.running ? `The tables are in ${name}.` : `${name} is paused.`;
   const f = v.film, playingNow = f && (serverNow() - f.at) / 1000 < f.seconds - 1;
-  if (!joined) $('joinmsg').textContent = playingNow ? 'A film is playing in the room now. Join to watch it from this point.' : 'This page plays each film in full quality as it is shown in the room. Between films it shows where the game is.';
+  if (!joined) $('joinmsg').textContent = playingNow ? 'A film is playing in the room now. Start to watch it from this point.' : 'This screen plays each film as it is shown in the room. Between films it shows where the game is.';
   syncFilm();
 }
 setInterval(tick, 250);
@@ -178,7 +181,7 @@ function openFilm(f) {
   frame.src = `${f.src}?autoplay=true&muted=false&loop=false&preload=true&rememberPosition=false${from > 1 ? '&t=' + from : ''}`;
   $('film').prepend(frame); $('hint').textContent = ''; document.body.classList.add("showing");
   readyT = setInterval(() => say('addEventListener', 'ready'), 400);   // ask until the player answers
-  hintT = setTimeout(() => { if (film === f && !st.played) $('hint').textContent = st.ready ? 'Tap the film to start it' : 'The film is not loading here. Watch it on Zoom.'; }, 6000);
+  hintT = setTimeout(() => { if (film === f && !st.played) $('hint').textContent = st.ready ? 'Tap the film to start it' : 'The film is not loading on this screen.'; }, 6000);
 }
 function closeFilm() { clearInterval(readyT); clearTimeout(hintT); if (frame) frame.remove(); frame = film = st = null; document.body.classList.remove("showing"); }
 function endFilm() { done = film.at; endedAt = Date.now(); closeFilm(); }
