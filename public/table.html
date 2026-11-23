@@ -6,7 +6,7 @@
 <title>AI Global Initiative: Exercise 001</title>
 <!-- AIGI participant screen. /play, then /play?team=<id>&role=<id>. The look is the BN24 v0.6 "AIGI blue" package (brand/bn24-blue.css): navy, the #7298E9 light,
      the dot map, and the clock set like the wordmark: white minutes, lit-glass seconds, and the lockup's bar draining as the time runs.
-     No BN24 mark: this is the room's clock, not a broadcast. Time up flips the screen to the package's light palette. -->
+     No BN24 mark: this is the room's clock, not a broadcast. The screen is always dark: at time up the clock sits at 00:00 with the bar empty. -->
 <style>
 @font-face { font-family: "Schibsted Grotesk"; font-weight: 400 900; src: url("fonts/schibsted-grotesk-latin-wght-normal.woff2") format("woff2"); }
 @font-face { font-family: "ArchivoV"; font-weight: 100 900; font-stretch: 62% 125%; src: url("fonts/archivo-latin-wdth-normal.woff2") format("woff2"); }
@@ -17,8 +17,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--deep);
 body { display: flex; flex-direction: column; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
 
 /* ground: navy, the dot map, two hairline flares */
-.bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(120% 90% at 30% 40%, var(--navy-hi) 0%, var(--navy) 45%, var(--deep) 100%); transition: background .6s; overflow: hidden; }
-.bg img { position: absolute; left: 50%; top: 50%; width: max(150vw, 190vh); transform: translate(-46%, -47%); opacity: .2; transition: opacity .6s; }
+.bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(120% 90% at 30% 40%, var(--navy-hi) 0%, var(--navy) 45%, var(--deep) 100%); overflow: hidden; }
+.bg img { position: absolute; left: 50%; top: 50%; width: max(150vw, 190vh); transform: translate(-46%, -47%); opacity: .2; }
 .bg i { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--blue) 30%, var(--ice) 50%, var(--blue) 70%, transparent); opacity: .35; }
 .bg i.a { top: 21%; } .bg i.b { bottom: 17%; opacity: .2; }
 .bg i.a::after { content: ""; position: absolute; left: 12%; width: 34%; top: -3px; height: 7px; background: radial-gradient(closest-side, rgba(207,224,255,.55), transparent); }
@@ -63,13 +63,6 @@ body.last .bar b { animation: pulse 1s ease-in-out infinite; }
 @keyframes roll { to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .ticker div { animation: none; } }
 
-/* time up: the light palette */
-body.up { --fg: #0B1B33; --soft: rgba(11,27,51,.6); --line: rgba(79,120,214,.3); }
-body.up .bg { background: radial-gradient(120% 90% at 30% 40%, #fff 0%, #EEF3FC 50%, #DCE6F8 100%); } body.up .bg img { opacity: .5; }
-body.up header .day, body.up .phase { color: #23479E; }
-body.up .ss { background: linear-gradient(180deg, #7298E9 0%, #4F78D6 55%, #2E55B8 100%); -webkit-background-clip: text; background-clip: text; }
-body.up .rail div.on { border-color: var(--blue-lo); }
-
 /* briefing */
 .feed { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 2px 2px 40px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .feed::-webkit-scrollbar { display: none; }
@@ -91,9 +84,6 @@ body.up .rail div.on { border-color: var(--blue-lo); }
 .thread .foot { padding: 0 20px 14px; font-size: .76em; color: #6B7280; }
 .note { color: var(--navy); background: linear-gradient(180deg, var(--blue-hi), var(--blue) 55%, var(--blue-lo)); }
 .note .eyebrow { opacity: .8; } .note .text { font-weight: 800; font-size: 1.25em; line-height: 1.25; margin-top: 6px; white-space: pre-line; }
-.brief { cursor: default; color: #fff; background: linear-gradient(180deg, rgba(20,41,75,.94), rgba(11,27,51,.97)); border-left: 4px solid var(--blue); padding-bottom: 12px; }
-.brief .eyebrow { color: var(--blue); margin-bottom: 8px; } .brief .row { display: flex; align-items: baseline; gap: 12px; padding: 7px 0; border-top: 1px solid var(--line); }
-.brief .row b { flex: none; min-width: 5.2em; font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; font-size: 1.15em; letter-spacing: -.01em; white-space: nowrap; } .brief .row span { font-size: .9em; line-height: 1.25; color: var(--ice); }
 
 .ident { position: fixed; inset: 0; z-index: 7; display: none; place-items: center; text-align: center; padding: 6vmin; background: linear-gradient(180deg, #9DB8F2, var(--blue) 55%, var(--blue-lo)); color: var(--navy); font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -.03em; line-height: .95; font-size: clamp(40px, 13vmin, 150px); text-wrap: balance; }
 body.ident .ident { display: grid; }
@@ -153,12 +143,12 @@ function render() {
   const idx = v.phases.findIndex((p) => p.id === v.phase);
   $('phase').textContent = idx >= 0 ? v.phases[idx].name : '';
   $('rail').innerHTML = v.phases.map((p, i) => `<div class="${i < idx ? 'done' : i === idx ? 'on' : ''}">${esc(p.name)}</div>`).join('');
-  const brief = v.brief || [], sig = JSON.stringify([v.feed.map((f) => f.key), v.day.id, brief]);
+  const sig = JSON.stringify([v.feed.map((f) => f.key), v.day.id]);
   if (sig !== feedSig) {
     const first = feedSig === ''; feedSig = sig;
-    $('feed').innerHTML = (brief.length ? `<div class="card brief"><div class="eyebrow">${esc(v.team.name)} only</div>${brief.map((r) => `<div class="row"><b>${esc(r.value)}</b><span>${esc(r.label)}</span></div>`).join('')}</div>` : '') + v.feed.map(cardHTML).join('');
+    $('feed').innerHTML = v.feed.map(cardHTML).join('');
     if (first) $('feed').querySelectorAll('.card').forEach((c) => c.style.animation = 'none');
-    const has = v.feed.length + brief.length > 0; $('feed').hidden = !has; document.body.classList.toggle('has-feed', has); $('feed').scrollTop = 0;
+    const has = v.feed.length > 0; $('feed').hidden = !has; document.body.classList.toggle('has-feed', has); $('feed').scrollTop = 0;
   }
   const T = v.ticker || [], ts = JSON.stringify(T);
   if (ts !== tickerSig) { tickerSig = ts; const el = $('ticker');
@@ -171,7 +161,7 @@ function tick() {
   const b = document.body.classList, live = !!v.phase;
   const ms = !live ? 0 : v.running ? v.endsAt - (Date.now() + offset) : v.remainingMs, s = Math.max(0, Math.ceil(ms / 1000));
   b.toggle('ident', (v.identifyUntil || 0) > Date.now() + offset); $('ident').textContent = v.role ? v.role.name : v.team.name;
-  b.toggle('standby', !live); b.toggle('paused', live && !v.running && ms > 0); b.toggle('up', live && ms <= 0); b.toggle('last', live && v.running && ms > 0 && ms <= 60000);
+  b.toggle('standby', !live); b.toggle('paused', live && !v.running && ms > 0); b.toggle('last', live && v.running && ms > 0 && ms <= 60000);
   const d = (n) => String(n).padStart(2, '0').split('').map((c) => `<span>${c}</span>`).join('');
   const html = live ? `<div class="mm">${d(Math.floor(s / 60))}<span class="c">:</span></div><div class="ss">${d(s % 60)}</div>` : `<div class="word">${esc(v.role ? v.role.name : v.team.name)}</div>`;
   if ($('digits').dataset.h !== html) { $('digits').dataset.h = html; $('digits').innerHTML = html; }

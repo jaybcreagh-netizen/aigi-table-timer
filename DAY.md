@@ -7,7 +7,6 @@ One page. Print it.
 - [ ] Run the whole thing once with every tablet, on the network you'll use in the room.
 - [ ] Check the run sheet order and every item's wording against the script (`content.json`). Check each film cue names the right film.
 - [ ] In Bunny, add this app's address to the library's allowed domains (Stream → library → Security). Then open the observer page (`/watch`) on the computer and monitor the observers will use, tap a film cue, and watch it play with sound.
-- [ ] Film a tablet under the lights. If the white time-up screen throws light on faces, ask for it to stay dark.
 
 ## The night before
 

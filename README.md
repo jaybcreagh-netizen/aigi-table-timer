@@ -23,9 +23,9 @@ It prints the links.
 
 ## Participants
 
-Before the first phase a tablet shows its table's name. Then the phase and the clock. Items arrive beside the clock; tap one to read it full screen. The Decide questions are not shown on tablets (the game master and the observers' screen have them). The last minute pulses, and at zero the screen turns white.
+Before the first phase a tablet shows its table's name. Then the phase and the clock. Items arrive beside the clock; tap one to read it full screen. The Decide questions are not shown on tablets (the game master and the observers' screen have them). The bar beside the clock pulses in the last minute. At zero the clock sits at 00:00 with the bar empty; the screen stays dark throughout.
 
-When the run reaches a **Show share prices and table figures** step, a small, dim line of share prices starts drifting slowly along the bottom of the screen, and each table gets a card of figures only it can see, at the top of its briefing column. Those figures follow the decisions recorded so far. Nothing else sits under the clock. Which figures are invented, and what each leans on, is in `FIGURES-DRAFT.md`.
+When the run reaches the **Show share prices** step, a small, dim line of share prices starts drifting slowly along the bottom of the screen. Nothing sits under the clock, and the briefing column holds only what the game master sends: posts, statements, leaks and notes. The tables get their numbers in the intel briefing, not on screen; the invented ones, and what each leans on, are listed in `FIGURES-DRAFT.md`.
 
 A tablet stays on its table: hold the table's name for three seconds to change it. A device is only ever sent items addressed to everyone, its table or its role.
 
@@ -35,7 +35,7 @@ A tablet stays on its table: hold the table's name for three seconds to change i
 
 - Open it in Chrome, full screen, and tap **Start with sound** once. A browser will not start a film with sound until someone has tapped the page. If the page is ever reloaded it needs that tap again.
 - When the game master taps a film cue, the film plays full screen. The server sends the film and the time it started, so a screen that is opened late or reloaded lands at the right point.
-- Between films it shows the day, the stage and its clock, the same quiet line of share prices as the tablets, what has been decided so far, the Decide questions (during Decide only), and whatever went to every table. Anything addressed to one table or role, each table's private figures, and Friday's two game-master-only outcomes are never sent to this screen.
+- Between films it shows the day, the stage and its clock, the same quiet line of share prices as the tablets, what has been decided so far, the Decide questions (during Decide only), and whatever went to every table. Anything addressed to one table or role and Friday's two game-master-only outcomes are never sent to this screen.
 - The screen is only ever sent the films that are playing, never the versions the room didn't pick.
 - On a wide screen nothing scrolls and the text is sized to be read across a room: the newest things are at the top and the oldest fall off the bottom. On a person's own laptop or phone the same address works and scrolls.
 - Zoom also carries the room's sound, a little late, so observers can hear a film twice. Whoever looks after the observers' screens turns Zoom's sound down while a film plays, or the room microphone is muted for it.

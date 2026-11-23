@@ -1,5 +1,5 @@
 {
- "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. 'run' is each day's run sheet in order: a step starts a phase, sends an item, records a decision, or is a cue the game master just ticks off. {'decision': true} records the day's first question. {'decision': 'key', 'q', 'opts'} is an outcome only the game master sees, kept under that key. 'by' + 'versions' on a cue name the film to play for an earlier decision; 'also' adds more parts to the name; FILMS: 'films' at the top lists every film ('video' is its Bunny Stream id, 'seconds' its length). A cue with 'film' (one film) or 'films' beside 'versions' (one film per earlier decision; 'also' parts play after it, in order) starts those films on the observers' screen (/watch) when the game master taps the cue. 'about' is a line of plain text shown to observers between films; 'when' shows a step or a question only for that decision. Items not in 'run' sit under More. Teams and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES (2026-11-21): names, facts and film numbers follow the reads as shot on 19 Nov (vault sources/2026-11-19-geeta-shoot-as-read.md) and the review export 'v3 review 2026-11-20'. Posts and leaks are copied from data/social.json; those marked 'draft': true are wording the script only describes, awaiting Jay's approval. The Decide questions are carried over from the 17 Nov version with the names changed. The two outcome steps on Friday and the choice-to-ending map are a reading of the films: confirm before the day. SHARE PRICES AND TABLE FIGURES: a {'board': n} step in 'run' turns on the day's 'ticker' and each table's 'brief' card (n is the stage: 1 morning, 2 afternoon). 'ticker' is the day's made-up share prices, one quiet line along the bottom of every screen; 'when' shows a price only for that decision. Ticker rows marked 'invented': true are not in the scripts or films; the rest appear in the film graphics. 'logo' on an item names a folder in public/orgs (copied from brand/orgs): posts use its avatar, statements its lockup, leaks its avatar in the header. 'brief' is each table's private figures, shown as one card at the top of that table's briefing column from the day's first board step: 'to' is the table; 'by' + 'versions' pick the value for an earlier decision; 'when' shows a row only for that decision; 'stage': 2 holds it back until the afternoon step. Every 'brief' row is made up (table/FIGURES-DRAFT.md), approved in bulk by Jay on 2026-11-21. The figures and lines that used to sit under the clock (each day's 'board' rows) were taken off the screens on 2026-11-23; they are in the git history.",
+ "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. 'run' is each day's run sheet in order: a step starts a phase, sends an item, records a decision, or is a cue the game master just ticks off. {'decision': true} records the day's first question. {'decision': 'key', 'q', 'opts'} is an outcome only the game master sees, kept under that key. 'by' + 'versions' on a cue name the film to play for an earlier decision; 'also' adds more parts to the name; FILMS: 'films' at the top lists every film ('video' is its Bunny Stream id, 'seconds' its length). A cue with 'film' (one film) or 'films' beside 'versions' (one film per earlier decision; 'also' parts play after it, in order) starts those films on the observers' screen (/watch) when the game master taps the cue. 'about' is a line of plain text shown to observers between films; 'when' shows a step or a question only for that decision. Items not in 'run' sit under More. Teams and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES (2026-11-21): names, facts and film numbers follow the reads as shot on 19 Nov (vault sources/2026-11-19-geeta-shoot-as-read.md) and the review export 'v3 review 2026-11-20'. Posts and leaks are copied from data/social.json; those marked 'draft': true are wording the script only describes, awaiting Jay's approval. The Decide questions are carried over from the 17 Nov version with the names changed. The two outcome steps on Friday and the choice-to-ending map are a reading of the films: confirm before the day. SHARE PRICES: a {'ticker': true} step in 'run' turns on the day's 'ticker', the made-up share prices in one quiet line along the bottom of every screen; 'when' shows a price only for that decision. Rows marked 'invented': true are not in the scripts or films; the rest appear in the film graphics. 'logo' on an item names a folder in public/orgs (copied from brand/orgs): posts use its avatar, statements its lockup, leaks its avatar in the header. The figures under the clock (each day's 'board' rows) and each table's private figures card ('brief') were taken off the screens on 2026-11-23: the tables get those numbers in their intel briefing. The numbers are in table/FIGURES-DRAFT.md and the old rows are in the git history.",
  "title": "AI Global Initiative: Exercise 001",
  "phases": [
   {
@@ -151,8 +151,8 @@
      "film": "f02"
     },
     {
-     "board": 1,
-     "title": "share prices and table figures"
+     "ticker": true,
+     "title": "share prices"
     },
     {
      "send": "british-compute-post"
@@ -267,73 +267,6 @@
      "value": "−18.3%",
      "invented": true
     }
-   ],
-   "brief": [
-    {
-     "to": "gov",
-     "value": "£250m",
-     "label": "emergency fund ministers can spend without a vote"
-    },
-    {
-     "to": "gov",
-     "value": "41%",
-     "label": "of the public say ministers are acting too slowly"
-    },
-    {
-     "to": "gov",
-     "value": "38 min",
-     "label": "average ambulance handover delay in the north"
-    },
-    {
-     "to": "frontier",
-     "value": "£1.1bn",
-     "label": "a year in UK contracts"
-    },
-    {
-     "to": "frontier",
-     "value": "$4bn",
-     "label": "value of the next model launch"
-    },
-    {
-     "to": "frontier",
-     "value": "12 of 400",
-     "label": "UK customers asking to pause Frontier Labs’ tools"
-    },
-    {
-     "to": "frontier",
-     "value": "60",
-     "label": "engineers who could be on site within a day"
-    },
-    {
-     "to": "infra",
-     "value": "£14m",
-     "label": "a day in penalties British Compute owes its customers"
-    },
-    {
-     "to": "infra",
-     "value": "£200m",
-     "label": "insurance cover left"
-    },
-    {
-     "to": "infra",
-     "value": "9 days",
-     "label": "to rebuild every affected site from clean backups"
-    },
-    {
-     "to": "infra",
-     "value": "3",
-     "label": "customers have given notice to leave"
-    },
-    {
-     "to": "infra",
-     "value": "11 of 11",
-     "label": "Rowan Health labs working on paper"
-    },
-    {
-     "to": "intl",
-     "value": "2",
-     "label": "countries have asked Britain for a briefing"
-    }
    ]
   },
   {
@@ -355,8 +288,8 @@
      }
     },
     {
-     "board": 1,
-     "title": "share prices and table figures"
+     "ticker": true,
+     "title": "share prices"
     },
     {
      "send": "frontier-offer"
@@ -509,93 +442,6 @@
      "value": "−34.6%",
      "invented": true
     }
-   ],
-   "brief": [
-    {
-     "to": "gov",
-     "value": "£250m",
-     "label": "emergency fund ministers can spend without a vote"
-    },
-    {
-     "to": "gov",
-     "value": "58%",
-     "label": "of the public say ministers are acting too slowly"
-    },
-    {
-     "to": "gov",
-     "value": "54 min",
-     "label": "average ambulance handover delay in the north"
-    },
-    {
-     "to": "gov",
-     "value": "3",
-     "label": "hospitals are asking for military help with logistics"
-    },
-    {
-     "to": "frontier",
-     "value": "£1.1bn",
-     "label": "a year in UK contracts"
-    },
-    {
-     "to": "frontier",
-     "value": "80%",
-     "label": "Frontier Labs’ own estimate that Hunter is clean"
-    },
-    {
-     "to": "frontier",
-     "value": "$4bn",
-     "label": "value of the next model launch"
-    },
-    {
-     "to": "frontier",
-     "value": "87 of 400",
-     "label": "UK customers asking to pause Frontier Labs’ tools"
-    },
-    {
-     "to": "frontier",
-     "value": "60",
-     "label": "engineers who could be on site within a day"
-    },
-    {
-     "to": "infra",
-     "value": "£14m",
-     "label": "a day in penalties British Compute owes its customers"
-    },
-    {
-     "to": "infra",
-     "value": "£158m",
-     "label": "insurance cover left"
-    },
-    {
-     "to": "infra",
-     "value": "9 days",
-     "label": "to rebuild every affected site from clean backups"
-    },
-    {
-     "to": "infra",
-     "value": "41",
-     "label": "customers have given notice to leave"
-    },
-    {
-     "to": "infra",
-     "value": "11 of 11",
-     "label": "Rowan Health labs working on paper"
-    },
-    {
-     "to": "intl",
-     "value": "27",
-     "label": "European data centres run the same setup"
-    },
-    {
-     "to": "intl",
-     "value": "15",
-     "label": "incident staff offered by allies"
-    },
-    {
-     "to": "intl",
-     "value": "9",
-     "label": "countries have asked Britain for a briefing"
-    }
    ]
   },
   {
@@ -617,8 +463,8 @@
      }
     },
     {
-     "board": 1,
-     "title": "share prices and table figures"
+     "ticker": true,
+     "title": "share prices"
     },
     {
      "send": "frontier-purging",
@@ -644,10 +490,6 @@
     {
      "cue": "Play film 11 · Friday afternoon, breaking",
      "film": "f11"
-    },
-    {
-     "board": 2,
-     "title": "International’s afternoon figure"
     },
     {
      "send": "white-house"
@@ -898,109 +740,6 @@
       ]
      },
      "invented": true
-    }
-   ],
-   "brief": [
-    {
-     "to": "gov",
-     "value": "£250m",
-     "label": "emergency fund, less anything already pledged"
-    },
-    {
-     "to": "gov",
-     "label": "of the public say ministers are acting too slowly",
-     "by": "d2",
-     "versions": {
-      "Frontier Labs’ Hunter": "49%",
-      "Sovereign": "66%",
-      "British oversight": "66%"
-     }
-    },
-    {
-     "to": "gov",
-     "value": "71 min",
-     "label": "average ambulance handover delay in the north"
-    },
-    {
-     "to": "gov",
-     "value": "7",
-     "label": "hospitals are asking for military help with logistics"
-    },
-    {
-     "to": "frontier",
-     "value": "£1.1bn",
-     "label": "a year in UK contracts"
-    },
-    {
-     "to": "frontier",
-     "value": "80%",
-     "label": "Frontier Labs’ own estimate that Hunter is clean"
-    },
-    {
-     "to": "frontier",
-     "value": "$4bn",
-     "label": "value of the next model launch"
-    },
-    {
-     "to": "frontier",
-     "value": "140 of 400",
-     "label": "UK customers asking to pause Frontier Labs’ tools"
-    },
-    {
-     "to": "frontier",
-     "value": "60",
-     "label": "engineers who could be on site within a day"
-    },
-    {
-     "to": "infra",
-     "value": "£14m",
-     "label": "a day in penalties British Compute owes its customers"
-    },
-    {
-     "to": "infra",
-     "value": "£130m",
-     "label": "insurance cover left"
-    },
-    {
-     "to": "infra",
-     "label": "to rebuild every affected site from clean backups",
-     "by": "d2",
-     "versions": {
-      "Frontier Labs’ Hunter": "13 days",
-      "Sovereign": "9 days",
-      "British oversight": "9 days"
-     }
-    },
-    {
-     "to": "infra",
-     "value": "96",
-     "label": "customers have given notice to leave"
-    },
-    {
-     "to": "infra",
-     "value": "11 of 11",
-     "label": "Rowan Health labs working on paper"
-    },
-    {
-     "to": "intl",
-     "value": "27",
-     "label": "European data centres run the same setup"
-    },
-    {
-     "to": "intl",
-     "value": "40",
-     "label": "incident staff offered by allies"
-    },
-    {
-     "to": "intl",
-     "value": "14",
-     "label": "countries have asked Britain for a briefing"
-    },
-    {
-     "to": "intl",
-     "value": "Full access",
-     "label": "to British evidence is Washington’s price for sharing intelligence",
-     "stage": 2
     }
    ]
   }

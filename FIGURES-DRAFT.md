@@ -1,12 +1,12 @@
 # Invented figures
 
-Jay approved all of these on 21 Nov. Each table's private figures are on the tablets (`content.json`: each table's `brief` card); change a number there. The figures shown to every table came off the screens on 23 Nov, when the board under the clock was removed. This page records what was invented and why.
+Jay approved all of these on 21 Nov. None of them is on the tablets or the observers' screen any more: the figures under the clock and each table's private figures card came off on 23 Nov, because the tables get their numbers in the intel briefing. This page is the record of what was invented and why, for whoever writes that briefing.
 
 Every number here is invented. Each is built to sit inside what Geeta reads, and the note says which scripted figure it leans on.
 
-## Shown to every table (not on screen since 23 Nov)
+## Shown to every table
 
-The price of time. These were the two shared lines on the board under the clock; kept here in case they come back.
+The price of time. These were the two shared lines under the clock.
 
 | Figure | Monday | Wednesday | Friday | Leans on |
 |---|---|---|---|---|
@@ -64,4 +64,4 @@ The price of time. These were the two shared lines on the board under the clock;
 
 - No figure settles a choice by itself.
 - Nothing contradicts a film or promises an ending.
-- At most two private figures per table per round on the tablet; this sheet has more than that so there is something to cut.
+- This sheet has more private figures per table than a round needs, so there is something to cut.
