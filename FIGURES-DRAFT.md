@@ -1,12 +1,12 @@
 # Invented figures
 
-Jay approved all of these on 21 Nov, and they are on the tablets (`content.json`: the two shared lines on each day's board, and each table's `brief` card). Change a number there; this page records what was invented and why.
+Jay approved all of these on 21 Nov. Each table's private figures are on the tablets (`content.json`: each table's `brief` card); change a number there. The figures shown to every table came off the screens on 23 Nov, when the board under the clock was removed. This page records what was invented and why.
 
 Every number here is invented. Each is built to sit inside what Geeta reads, and the note says which scripted figure it leans on.
 
-## Shown to every table
+## Shown to every table (not on screen since 23 Nov)
 
-The price of time, on the board from Monday.
+The price of time. These were the two shared lines on the board under the clock; kept here in case they come back.
 
 | Figure | Monday | Wednesday | Friday | Leans on |
 |---|---|---|---|---|

@@ -114,7 +114,7 @@ function stepText(s) {
   const iff = s.when ? Object.entries(s.when).filter(([d]) => !v.decisions[d]).map(([, c]) => 'if ' + [].concat(c).join(' or ')).join(', ') : '';
   if (s.phase) { const p = v.phases.find((x) => x.id === s.phase); return { kind: 'Start', title: p.name, sub: `${p.minutes} min` }; }
   if (s.send) { const it = today().items.find((x) => x.id === s.send) || { title: s.send }; return { kind: 'Send', title: it.title, sub: [seatName(s.to || it.to || 'all'), iff].filter(Boolean).join(' · ') }; }
-  if (s.board) return { kind: 'Show', title: s.title || 'Background figures', sub: 'Every table' };
+  if (s.board) return { kind: 'Show', title: s.title || 'share prices and table figures', sub: s.board === 1 ? 'Every table' : '' };
   if (s.decision) { const own = typeof s.decision === 'string', q = own ? s : firstQ(), key = own ? s.decision : v.day; return { kind: 'Decision', title: q.q, sub: v.decisions[key] || '', opts: q.opts || [], key }; }
   let sub = iff; if (s.by) { const parts = [s].concat(s.also || []).map((p) => { const c = v.decisions[p.by]; return c ? (p.versions || {})[c] || c : ''; }), c = v.decisions[s.by];   // 'also' adds more parts to the film's name
     sub = parts.every(Boolean) ? parts.join(' + ') + (s.also ? '' : ` · ${dayName(s.by)}: ${c}`) : parts.some(Boolean) ? parts.map((x) => x || '?').join(' + ') + ' · a decision isn’t recorded' : `Depends on ${dayName(s.by)}'s decision, which isn't recorded`; }

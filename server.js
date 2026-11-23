@@ -47,16 +47,14 @@ function tableView(teamId, roleId) {
     const item = s.note ? { type: 'note', text: s.note } : d.items.find((i) => i.id === s.id);
     return item && { ...item, to: undefined, key: s.key, at: s.at, only: s.to === 'all' ? '' : s.to === team.id ? team.name : role.name };
   }).filter(Boolean).reverse();
-  // the background board: the day's figures and this table's own lines, once the run reaches a 'board' step; a later row with the same 'k' replaces the earlier one
-  const stage = (state.board || {})[d.id] || 0, kept = new Map(), val = (r, x) => r.by ? (r.versions || {})[state.decisions[r.by]] || '' : x;
-  (d.board || []).forEach((r, i) => { if ((r.stage || 1) <= stage && fits(r.when) && (!r.to || r.to === team.id || (role && r.to === role.id))) kept.set(r.k || '_' + i, r); });
-  const board = [...kept.values()].map((r) => r.label ? { value: val(r, r.value), label: r.label } : { text: val(r, r.text) }).filter((r) => r.value || r.text);
+  // once the run reaches a 'board' step: the share prices along the bottom and this table's card of private figures
+  const stage = (state.board || {})[d.id] || 0, val = (r, x) => r.by ? (r.versions || {})[state.decisions[r.by]] || '' : x;
   const brief = (d.brief || []).filter((r) => (r.stage || 1) <= stage && fits(r.when) && r.to === team.id).map((r) => ({ value: val(r, r.value), label: r.label })).filter((r) => r.value);   // this table's private figures
   const ticker = stage ? (d.ticker || []).filter((t) => fits(t.when)).map((t) => ({ name: t.name, value: t.value })) : [];
   return { now: Date.now(), title: content.title, team: { id: team.id, name: team.name }, role: role && { id: role.id, name: role.name }, day: { id: d.id, name: d.name },
-    phases: phases(), ...timer(), identifyUntil: state.identifyUntil, questions: state.phase === 'decide' ? asked(d) : [], feed, board, ticker, brief };
+    phases: phases(), ...timer(), identifyUntil: state.identifyUntil, feed, ticker, brief };
 }
-// what an observer sees: the films playing now (only those, never the versions the room didn't pick), the clock, the board's public rows and what went to everyone
+// what an observer sees: the films playing now (only those, never the versions the room didn't pick), the clock, the Decide questions, the share prices and what went to everyone
 const filmList = () => (content.films && content.films.list) || {};
 // the films a cue plays, in order: its own film (or the version for an earlier decision), then each 'also' part.
 // A part whose decision isn't recorded is left out; for the first part the game master can name the version instead.
@@ -71,12 +69,10 @@ function watchView() {
     return item && { ...item, to: undefined, key: s.key, at: s.at };
   }).filter(Boolean).reverse();
   const decided = content.days.filter((x) => state.decisions[x.id]).map((x) => ({ day: x.name, q: (asked(x)[0] || {}).q || '', choice: state.decisions[x.id] }));
-  const stage = (state.board || {})[d.id] || 0, kept = new Map(), val = (r, x) => r.by ? (r.versions || {})[state.decisions[r.by]] || '' : x;   // the board rows that go to every table
-  (d.board || []).forEach((r, i) => { if ((r.stage || 1) <= stage && fits(r.when) && !r.to) kept.set(r.k || '_' + i, r); });
-  const board = [...kept.values()].map((r) => r.label ? { value: val(r, r.value), label: r.label } : { text: val(r, r.text) }).filter((r) => r.value || r.text);
+  const stage = (state.board || {})[d.id] || 0;
   const ticker = stage ? (d.ticker || []).filter((t) => fits(t.when)).map((t) => ({ name: t.name, value: t.value })) : [];
   return { now: Date.now(), title: content.title, about: content.about || '', day: { id: d.id, name: d.name },
-    tables: S().teams.map((t) => t.name), phases: phases(), ...timer(), questions: state.phase === 'decide' ? asked(d) : [], decided, feed, board, ticker,
+    tables: S().teams.map((t) => t.name), phases: phases(), ...timer(), questions: state.phase === 'decide' ? asked(d) : [], decided, feed, ticker,
     film: ids.length ? { at: state.film.at, parts: ids.map((id) => ({ src: content.films.embed + filmList()[id].video, seconds: filmList()[id].seconds })) } : null };
 }
 function controlView() {

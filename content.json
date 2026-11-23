@@ -1,5 +1,5 @@
 {
- "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. 'run' is each day's run sheet in order: a step starts a phase, sends an item, records a decision, or is a cue the game master just ticks off. {'decision': true} records the day's first question. {'decision': 'key', 'q', 'opts'} is an outcome only the game master sees, kept under that key. 'by' + 'versions' on a cue name the film to play for an earlier decision; 'also' adds more parts to the name; FILMS: 'films' at the top lists every film ('video' is its Bunny Stream id, 'seconds' its length). A cue with 'film' (one film) or 'films' beside 'versions' (one film per earlier decision; 'also' parts play after it, in order) starts those films on the observers' screen (/watch) when the game master taps the cue. 'about' is a line of plain text shown to observers between films; 'when' shows a step or a question only for that decision. Items not in 'run' sit under More. Teams and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES (2026-11-21): names, facts and film numbers follow the reads as shot on 19 Nov (vault sources/2026-11-19-geeta-shoot-as-read.md) and the review export 'v3 review 2026-11-20'. Posts and leaks are copied from data/social.json; those marked 'draft': true are wording the script only describes, awaiting Jay's approval. The Decide questions are carried over from the 17 Nov version with the names changed. The two outcome steps on Friday and the choice-to-ending map are a reading of the films: confirm before the day. BACKGROUND BOARD: 'board' is each day's figures and lines beside the clock, shown when the run reaches a {'board': n} step (n is the stage: 1 morning, 2 afternoon; a later row with the same 'k' replaces the earlier one). A row is a figure ('value' + 'label') or a line ('text'); 'to' limits it to one table; 'by' + 'versions' pick the value or text for an earlier decision; 'when' shows it only for that decision. 'ticker' is the day's made-up share prices along the bottom. Rows marked 'invented': true are not in the scripts or films and await Jay's approval; the rest are figures Geeta reads or that appear in the film graphics. 'logo' on an item names a folder in public/orgs (copied from brand/orgs): posts use its avatar, statements its lockup, leaks its avatar in the header. 'brief' is each table's private figures, shown as one card at the top of that table's briefing column from the day's first board step: 'to' is the table, the rest works like a board row. Every 'brief' row and the board lines marked 'invented' are made up (table/FIGURES-DRAFT.md), approved in bulk by Jay on 2026-11-21.",
+ "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. 'run' is each day's run sheet in order: a step starts a phase, sends an item, records a decision, or is a cue the game master just ticks off. {'decision': true} records the day's first question. {'decision': 'key', 'q', 'opts'} is an outcome only the game master sees, kept under that key. 'by' + 'versions' on a cue name the film to play for an earlier decision; 'also' adds more parts to the name; FILMS: 'films' at the top lists every film ('video' is its Bunny Stream id, 'seconds' its length). A cue with 'film' (one film) or 'films' beside 'versions' (one film per earlier decision; 'also' parts play after it, in order) starts those films on the observers' screen (/watch) when the game master taps the cue. 'about' is a line of plain text shown to observers between films; 'when' shows a step or a question only for that decision. Items not in 'run' sit under More. Teams and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES (2026-11-21): names, facts and film numbers follow the reads as shot on 19 Nov (vault sources/2026-11-19-geeta-shoot-as-read.md) and the review export 'v3 review 2026-11-20'. Posts and leaks are copied from data/social.json; those marked 'draft': true are wording the script only describes, awaiting Jay's approval. The Decide questions are carried over from the 17 Nov version with the names changed. The two outcome steps on Friday and the choice-to-ending map are a reading of the films: confirm before the day. SHARE PRICES AND TABLE FIGURES: a {'board': n} step in 'run' turns on the day's 'ticker' and each table's 'brief' card (n is the stage: 1 morning, 2 afternoon). 'ticker' is the day's made-up share prices, one quiet line along the bottom of every screen; 'when' shows a price only for that decision. Ticker rows marked 'invented': true are not in the scripts or films; the rest appear in the film graphics. 'logo' on an item names a folder in public/orgs (copied from brand/orgs): posts use its avatar, statements its lockup, leaks its avatar in the header. 'brief' is each table's private figures, shown as one card at the top of that table's briefing column from the day's first board step: 'to' is the table; 'by' + 'versions' pick the value for an earlier decision; 'when' shows a row only for that decision; 'stage': 2 holds it back until the afternoon step. Every 'brief' row is made up (table/FIGURES-DRAFT.md), approved in bulk by Jay on 2026-11-21. The figures and lines that used to sit under the clock (each day's 'board' rows) were taken off the screens on 2026-11-23; they are in the git history.",
  "title": "AI Global Initiative: Exercise 001",
  "phases": [
   {
@@ -152,7 +152,7 @@
     },
     {
      "board": 1,
-     "title": "Monday’s figures"
+     "title": "share prices and table figures"
     },
     {
      "send": "british-compute-post"
@@ -166,10 +166,6 @@
     {
      "cue": "Play film 03 · Monday afternoon, breaking",
      "film": "f03"
-    },
-    {
-     "board": 2,
-     "title": "Afternoon figures"
     },
     {
      "send": "kholod-post"
@@ -243,81 +239,6 @@
       "It’s investigating whether a foreign actor has obtained account credentials, possibly through British Compute’s own systems."
      ],
      "logo": "frontier-labs"
-    }
-   ],
-   "board": [
-    {
-     "k": "samples",
-     "value": "4,000",
-     "label": "blood samples affected"
-    },
-    {
-     "k": "traced",
-     "value": "130",
-     "label": "transfusion patients being traced"
-    },
-    {
-     "k": "ops",
-     "value": "200+",
-     "label": "operations postponed"
-    },
-    {
-     "k": "pay",
-     "value": "250,000+",
-     "label": "payments frozen"
-    },
-    {
-     "k": "bank",
-     "value": "£3bn",
-     "label": "one bank could not process"
-    },
-    {
-     "k": "mkt",
-     "value": "£30bn",
-     "label": "wiped off Britain’s largest firms"
-    },
-    {
-     "k": "ops",
-     "stage": 2,
-     "value": "400+",
-     "label": "procedures postponed"
-    },
-    {
-     "k": "samples",
-     "stage": 2,
-     "value": "11",
-     "label": "hospitals still affected"
-    },
-    {
-     "k": "traced",
-     "stage": 2,
-     "value": "2",
-     "label": "patients in intensive care"
-    },
-    {
-     "to": "gov",
-     "text": "The Bank of England has extended its trading hours tonight."
-    },
-    {
-     "to": "infra",
-     "text": "British Compute manages cloud systems for thousands of UK organisations."
-    },
-    {
-     "to": "frontier",
-     "text": "From next year the NHS will offer cancer vaccines designed by Frontier Labs’ AI."
-    },
-    {
-     "to": "frontier",
-     "stage": 2,
-     "text": "More than 400 British organisations use Frontier Labs’ security tools."
-    },
-    {
-     "invented": true,
-     "text": "Each day the systems stay down costs the economy about £350m and postpones about 200 procedures."
-    },
-    {
-     "invented": true,
-     "text": "Labs are retesting 1,000 samples a day by hand. The north has four days of O-negative blood left."
     }
    ],
    "ticker": [
@@ -435,7 +356,7 @@
     },
     {
      "board": 1,
-     "title": "Wednesday’s figures"
+     "title": "share prices and table figures"
     },
     {
      "send": "frontier-offer"
@@ -449,10 +370,6 @@
     {
      "cue": "Play film 07 · Wednesday afternoon, breaking",
      "film": "f07"
-    },
-    {
-     "board": 2,
-     "title": "Afternoon figures"
     },
     {
      "send": "bank-claim"
@@ -562,73 +479,6 @@
       }
      ],
      "logo": "frontier-labs"
-    }
-   ],
-   "board": [
-    {
-     "k": "dead",
-     "value": "1",
-     "label": "patient has died, in Hull"
-    },
-    {
-     "k": "samples",
-     "value": "2,000+",
-     "label": "blood samples still unchecked"
-    },
-    {
-     "k": "ops",
-     "label": "procedures postponed",
-     "by": "d1",
-     "versions": {
-      "Restart": "900+",
-      "Isolate the machines": "500+",
-      "Cut the site off": "Nearly 500"
-     }
-    },
-    {
-     "k": "pay",
-     "value": "Nearly 1m",
-     "label": "payments wrongly blocked"
-    },
-    {
-     "k": "cost",
-     "value": "£1bn+",
-     "label": "cost to the economy"
-    },
-    {
-     "k": "dc",
-     "value": "4",
-     "label": "UK data centres affected"
-    },
-    {
-     "to": "gov",
-     "text": "Hospitals say they can’t rule out further cases."
-    },
-    {
-     "to": "infra",
-     "by": "d1",
-     "versions": {
-      "Restart": "Services were restarted on Monday. Within a day the problems were back.",
-      "Isolate the machines": "Rowan Health expects its laboratory systems back tomorrow.",
-      "Cut the site off": "Councils and transport systems went down with the main site. Labs are due back on Friday."
-     }
-    },
-    {
-     "to": "frontier",
-     "text": "Frontier Labs has confirmed its research systems kept running after the shutdown."
-    },
-    {
-     "to": "gov",
-     "stage": 2,
-     "text": "The FCA says there is no evidence anyone’s money has been taken."
-    },
-    {
-     "invented": true,
-     "text": "Each day the systems stay down costs the economy about £350m and postpones about 250 procedures."
-    },
-    {
-     "invented": true,
-     "text": "Labs are retesting 1,000 samples a day by hand. The north has two days of O-negative blood left."
     }
    ],
    "ticker": [
@@ -768,7 +618,7 @@
     },
     {
      "board": 1,
-     "title": "Friday’s figures"
+     "title": "share prices and table figures"
     },
     {
      "send": "frontier-purging",
@@ -797,7 +647,7 @@
     },
     {
      "board": 2,
-     "title": "Afternoon figures"
+     "title": "International’s afternoon figure"
     },
     {
      "send": "white-house"
@@ -951,103 +801,6 @@
      "stats": "9.4K reposts",
      "text": "Hunter is ready to help in Ireland too. Governments on both sides of the Atlantic must act quickly, before this AI system spreads any further.",
      "logo": "frontier-labs"
-    }
-   ],
-   "board": [
-    {
-     "k": "ops",
-     "value": "1,600+",
-     "label": "operations cancelled"
-    },
-    {
-     "k": "dc",
-     "label": "UK data centres compromised",
-     "by": "d2",
-     "versions": {
-      "Frontier Labs’ Hunter": "6",
-      "Sovereign": "4",
-      "British oversight": "4"
-     }
-    },
-    {
-     "k": "new",
-     "label": "new UK sites overnight",
-     "by": "d2",
-     "versions": {
-      "Frontier Labs’ Hunter": "2",
-      "Sovereign": "0",
-      "British oversight": "0"
-     }
-    },
-    {
-     "k": "ie",
-     "stage": 2,
-     "value": "48 hours",
-     "label": "undetected in a data centre in Ireland"
-    },
-    {
-     "to": "gov",
-     "when": {
-      "d2": "Frontier Labs’ Hunter"
-     },
-     "text": "Several A&E departments are diverting ambulances."
-    },
-    {
-     "to": "gov",
-     "when": {
-      "d2": [
-       "Sovereign",
-       "British oversight"
-      ]
-     },
-     "text": "Hospital laboratories are still working on pen and paper."
-    },
-    {
-     "to": "infra",
-     "when": {
-      "d2": "Frontier Labs’ Hunter"
-     },
-     "text": "Hospital and banking networks began coming back online yesterday evening."
-    },
-    {
-     "to": "infra",
-     "when": {
-      "d2": [
-       "Sovereign",
-       "British oversight"
-      ]
-     },
-     "text": "Recovery at the four affected sites remains slow, with extra checks before systems return."
-    },
-    {
-     "to": "frontier",
-     "when": {
-      "d2": "Frontier Labs’ Hunter"
-     },
-     "text": "Frontier Labs says Hunter is purging the rogue code and is the only system that can stop the spread."
-    },
-    {
-     "to": "frontier",
-     "when": {
-      "d2": [
-       "Sovereign",
-       "British oversight"
-      ]
-     },
-     "text": "Frontier Labs says Hunter could clear the network within 24 hours."
-    },
-    {
-     "to": "intl",
-     "stage": 2,
-     "text": "The White House is sending investigators to Ireland and wants the evidence British teams have gathered."
-    },
-    {
-     "invented": true,
-     "text": "Each day the systems stay down costs the economy about £350m and postpones about 350 procedures."
-    },
-    {
-     "invented": true,
-     "text": "Labs are retesting 1,000 samples a day by hand. The north has two days of O-negative blood left."
     }
    ],
    "ticker": [
