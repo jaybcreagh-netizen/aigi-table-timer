@@ -18,7 +18,7 @@ fs.watchFile(path.join(DIR, 'content.json'), { interval: 1000 }, () => { try { c
 
 const seedSetup = () => ({ teams: content.teams.map((t) => ({ id: t.id, name: t.name, roles: (t.roles || []).map((r) => ({ ...r })) })),
   minutes: Object.fromEntries(content.phases.map((p) => [p.id, p.minutes])), joinCode: '' });
-const fresh = () => ({ day: content.days[0].id, phase: null, running: false, endsAt: 0, remainingMs: 0, durationMs: 0, sent: [], step: {}, decisions: {}, film: null, identifyUntil: 0, setup: seedSetup() });
+const fresh = () => ({ day: content.days[0].id, phase: null, running: false, endsAt: 0, remainingMs: 0, durationMs: 0, sent: [], step: {}, decisions: {}, board: {}, film: null, identifyUntil: 0, setup: seedSetup() });
 let state = fresh();
 try { const s = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); state = Object.assign(fresh(), s); if (!s.setup) state.setup = seedSetup(); } catch {}
 const KEY = process.env.AIGI_KEY || '';   // no key unless one is set: fine in the room, set one before hosting it on a public address
@@ -35,6 +35,9 @@ const newId = (name) => { const used = new Set(['all', ...S().teams.map((t) => t
   const base = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || 'seat'; let id = base, n = 2; while (used.has(id)) id = `${base}-${n++}`; return id; };
 const clean = (s, max = 60) => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
+// a question with 'when' is asked only after that earlier decision (a value, or a list of values); the first question asked is the one recorded
+const fits = (when) => !when || Object.entries(when).every(([d, c]) => [].concat(c).includes(state.decisions[d]));
+const asked = (d) => (d.questions || []).filter((q) => fits(q.when));
 // what one device is allowed to see
 function tableView(teamId, roleId) {
   const team = S().teams.find((t) => t.id === teamId);
@@ -44,21 +47,37 @@ function tableView(teamId, roleId) {
     const item = s.note ? { type: 'note', text: s.note } : d.items.find((i) => i.id === s.id);
     return item && { ...item, to: undefined, key: s.key, at: s.at, only: s.to === 'all' ? '' : s.to === team.id ? team.name : role.name };
   }).filter(Boolean).reverse();
+  // the background board: the day's figures and this table's own lines, once the run reaches a 'board' step; a later row with the same 'k' replaces the earlier one
+  const stage = (state.board || {})[d.id] || 0, kept = new Map(), val = (r, x) => r.by ? (r.versions || {})[state.decisions[r.by]] || '' : x;
+  (d.board || []).forEach((r, i) => { if ((r.stage || 1) <= stage && fits(r.when) && (!r.to || r.to === team.id || (role && r.to === role.id))) kept.set(r.k || '_' + i, r); });
+  const board = [...kept.values()].map((r) => r.label ? { value: val(r, r.value), label: r.label } : { text: val(r, r.text) }).filter((r) => r.value || r.text);
+  const brief = (d.brief || []).filter((r) => (r.stage || 1) <= stage && fits(r.when) && r.to === team.id).map((r) => ({ value: val(r, r.value), label: r.label })).filter((r) => r.value);   // this table's private figures
+  const ticker = stage ? (d.ticker || []).filter((t) => fits(t.when)).map((t) => ({ name: t.name, value: t.value })) : [];
   return { now: Date.now(), title: content.title, team: { id: team.id, name: team.name }, role: role && { id: role.id, name: role.name }, day: { id: d.id, name: d.name },
-    phases: phases(), ...timer(), identifyUntil: state.identifyUntil, questions: state.phase === 'decide' ? d.questions : [], feed };
+    phases: phases(), ...timer(), identifyUntil: state.identifyUntil, questions: state.phase === 'decide' ? asked(d) : [], feed, board, ticker, brief };
 }
-// what an observer sees: the film playing now (only that one, never the versions the room didn't pick), the clock, and what went to everyone
+// what an observer sees: the films playing now (only those, never the versions the room didn't pick), the clock, the board's public rows and what went to everyone
 const filmList = () => (content.films && content.films.list) || {};
+// the films a cue plays, in order: its own film (or the version for an earlier decision), then each 'also' part.
+// A part whose decision isn't recorded is left out; for the first part the game master can name the version instead.
+function cueFilms(s, named) {
+  const one = (p) => p.film || (p.films && p.films[state.decisions[p.by]]) || '';
+  return [one(s) || (Object.values(s.films || {}).includes(named) ? named : ''), ...(s.also || []).map(one)].filter((id) => filmList()[id]);
+}
 function watchView() {
-  const d = day(), f = state.film && filmList()[state.film.id];
+  const d = day(), ids = state.film ? (state.film.ids || []).filter((id) => filmList()[id]) : [];
   const feed = state.sent.filter((s) => s.day === d.id && s.to === 'all').map((s) => {
     const item = s.note ? { type: 'note', text: s.note } : d.items.find((i) => i.id === s.id);
     return item && { ...item, to: undefined, key: s.key, at: s.at };
   }).filter(Boolean).reverse();
-  const decided = content.days.filter((x) => state.decisions[x.id]).map((x) => ({ day: x.name, q: ((x.questions || [])[0] || {}).q || '', choice: state.decisions[x.id] }));
-  return { now: Date.now(), title: content.title, about: content.about || '', day: { id: d.id, name: d.name, background: d.background || '' }, days: content.days.map((x) => ({ id: x.id, name: x.name })),
-    tables: S().teams.map((t) => t.name), phases: phases(), ...timer(), questions: state.phase === 'decide' ? d.questions : [], decided, feed,
-    film: f ? { src: content.films.embed + f.video, at: state.film.at, seconds: f.seconds } : null };
+  const decided = content.days.filter((x) => state.decisions[x.id]).map((x) => ({ day: x.name, q: (asked(x)[0] || {}).q || '', choice: state.decisions[x.id] }));
+  const stage = (state.board || {})[d.id] || 0, kept = new Map(), val = (r, x) => r.by ? (r.versions || {})[state.decisions[r.by]] || '' : x;   // the board rows that go to every table
+  (d.board || []).forEach((r, i) => { if ((r.stage || 1) <= stage && fits(r.when) && !r.to) kept.set(r.k || '_' + i, r); });
+  const board = [...kept.values()].map((r) => r.label ? { value: val(r, r.value), label: r.label } : { text: val(r, r.text) }).filter((r) => r.value || r.text);
+  const ticker = stage ? (d.ticker || []).filter((t) => fits(t.when)).map((t) => ({ name: t.name, value: t.value })) : [];
+  return { now: Date.now(), title: content.title, about: content.about || '', day: { id: d.id, name: d.name },
+    tables: S().teams.map((t) => t.name), phases: phases(), ...timer(), questions: state.phase === 'decide' ? asked(d) : [], decided, feed, board, ticker,
+    film: ids.length ? { at: state.film.at, parts: ids.map((id) => ({ src: content.films.embed + filmList()[id].video, seconds: filmList()[id].seconds })) } : null };
 }
 function controlView() {
   const counts = {}; let watching = 0; for (const c of clients) if (c.watch) watching++; else if (!c.control) { counts[c.team] = (counts[c.team] || 0) + 1; if (c.role) counts[c.role] = (counts[c.role] || 0) + 1; }
@@ -84,14 +103,14 @@ const commands = {
     state.durationMs = Math.max(state.durationMs + ms, state.running ? state.endsAt - Date.now() : state.remainingMs); },
   end: clearClock,
   // the run sheet: each day's steps in order (content.json 'run'). A step starts a phase, sends an item, records the day's decision, or is a cue that is only ticked off.
-  // A film cue also starts its film for observers: 'film' is the one film, 'films' the version for an earlier day's decision, 'pick' (or 'films' with no decision recorded) the one the game master tapped.
-  step({ i, film }) { const run = day().run || [], s = run[i]; if (!s) return; if (s.phase) commands.start({ phase: s.phase }); else if (s.send) commands.send({ id: s.send, to: s.to });
-    const options = s.pick || Object.values(s.films || {}), id = s.film || (s.films && s.films[state.decisions[s.by]]) || (options.includes(film) ? film : null);
-    if (id) commands.film({ id }); state.step[state.day] = i + 1; },
-  film({ id }) { if (filmList()[id]) state.film = { id, at: Date.now() }; },
+  // A film cue also starts its films for observers (see cueFilms).
+  step({ i, film }) { const run = day().run || [], s = run[i]; if (!s) return; if (s.phase) commands.start({ phase: s.phase }); else if (s.send) commands.send({ id: s.send, to: s.to }); else if (s.board) (state.board ||= {})[state.day] = s.board;
+    const ids = cueFilms(s, film); if (ids.length) state.film = { ids, at: Date.now() }; state.step[state.day] = i + 1; },
+  film({ id }) { if (filmList()[id]) state.film = { ids: [id], at: Date.now() }; },
   filmStop() { state.film = null; },
   // the room's decision for the day: picks which bulletin version and which follow-up items the later days show
-  decide({ i, choice }) { const q = (day().questions || [])[0]; if (!q || !(q.opts || []).includes(choice)) return; state.decisions[state.day] = choice; if (Number.isInteger(i)) state.step[state.day] = i + 1; },
+  decide({ i, choice }) { const s = (day().run || [])[i], own = s && typeof s.decision === 'string', opts = own ? s.opts : (asked(day())[0] || {}).opts;   // a step with its own key is an outcome only the game master records
+    if (!(opts || []).includes(choice)) return; state.decisions[own ? s.decision : state.day] = choice; if (Number.isInteger(i) && i >= (state.step[state.day] || 0)) state.step[state.day] = i + 1; },
   undecide() { delete state.decisions[state.day]; },
   stepBack() { state.step[state.day] = Math.max(0, (state.step[state.day] || 0) - 1); },
   identify() { state.identifyUntil = Date.now() + 12000; },

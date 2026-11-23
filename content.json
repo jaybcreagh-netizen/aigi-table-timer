@@ -1,128 +1,1254 @@
 {
- "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. 'run' is each day's run sheet in order: a step starts a phase, sends an item, records the decision ('decision': the day's first question and its options), or is a cue the game master just ticks off. 'by' + 'versions' on a cue name the version to play for an earlier day's decision; a cue with 'film' (one film), 'films' (one per earlier decision) or 'pick' (the game master chooses) also starts that film on the observer page (/watch) when the game master taps it; 'films' at the top lists every film: 'video' is its Bunny Stream id, 'seconds' its length; 'about' and each day's 'background' are plain text shown to observers between films; 'when' shows a step only for that decision. Items not in 'run' sit under More. Teams and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES: statements and Wednesday's four posts are word for word from the Google Doc 'AI GI Scripts:' (read 2026-11-15). Questions, roles, the intelligence note and Friday's updates come from docs/story-flow-proposal.json and docs/flow-review.html, which are proposals: confirm before the day.",
+ "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. 'run' is each day's run sheet in order: a step starts a phase, sends an item, records a decision, or is a cue the game master just ticks off. {'decision': true} records the day's first question. {'decision': 'key', 'q', 'opts'} is an outcome only the game master sees, kept under that key. 'by' + 'versions' on a cue name the film to play for an earlier decision; 'also' adds more parts to the name; FILMS: 'films' at the top lists every film ('video' is its Bunny Stream id, 'seconds' its length). A cue with 'film' (one film) or 'films' beside 'versions' (one film per earlier decision; 'also' parts play after it, in order) starts those films on the observers' screen (/watch) when the game master taps the cue. 'about' is a line of plain text shown to observers between films; 'when' shows a step or a question only for that decision. Items not in 'run' sit under More. Teams and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES (2026-11-21): names, facts and film numbers follow the reads as shot on 19 Nov (vault sources/2026-11-19-geeta-shoot-as-read.md) and the review export 'v3 review 2026-11-20'. Posts and leaks are copied from data/social.json; those marked 'draft': true are wording the script only describes, awaiting Jay's approval. The Decide questions are carried over from the 17 Nov version with the names changed. The two outcome steps on Friday and the choice-to-ending map are a reading of the films: confirm before the day. BACKGROUND BOARD: 'board' is each day's figures and lines beside the clock, shown when the run reaches a {'board': n} step (n is the stage: 1 morning, 2 afternoon; a later row with the same 'k' replaces the earlier one). A row is a figure ('value' + 'label') or a line ('text'); 'to' limits it to one table; 'by' + 'versions' pick the value or text for an earlier decision; 'when' shows it only for that decision. 'ticker' is the day's made-up share prices along the bottom. Rows marked 'invented': true are not in the scripts or films and await Jay's approval; the rest are figures Geeta reads or that appear in the film graphics. 'logo' on an item names a folder in public/orgs (copied from brand/orgs): posts use its avatar, statements its lockup, leaks its avatar in the header. 'brief' is each table's private figures, shown as one card at the top of that table's briefing column from the day's first board step: 'to' is the table, the rest works like a board row. Every 'brief' row and the board lines marked 'invented' are made up (table/FIGURES-DRAFT.md), approved in bulk by Jay on 2026-11-21.",
  "title": "AI Global Initiative: Exercise 001",
  "phases": [
-  { "id": "prepare", "name": "Prepare", "minutes": 10 },
-  { "id": "discuss", "name": "Discuss", "minutes": 25 },
-  { "id": "decide", "name": "Decide", "minutes": 10 }
+  {
+   "id": "prepare",
+   "name": "Prepare",
+   "minutes": 10
+  },
+  {
+   "id": "discuss",
+   "name": "Discuss",
+   "minutes": 25
+  },
+  {
+   "id": "decide",
+   "name": "Decide",
+   "minutes": 10
+  }
  ],
  "teams": [
-  { "id": "gov", "name": "Government" },
-  { "id": "meridian", "name": "Meridian" },
-  { "id": "infra", "name": "Infrastructure and services" },
-  { "id": "intl", "name": "International" }
+  {
+   "id": "gov",
+   "name": "Government"
+  },
+  {
+   "id": "frontier",
+   "name": "Frontier Labs"
+  },
+  {
+   "id": "infra",
+   "name": "Infrastructure and services"
+  },
+  {
+   "id": "intl",
+   "name": "International"
+  }
  ],
- "about": "A tabletop exercise played in one room over three days of the story: Monday, Wednesday and Friday. Each day the tables prepare, discuss, then decide. This page plays each film as it is shown in the room, then shows where the game is.",
+ "about": "A tabletop exercise played in one room over three days of the story: Monday, Wednesday and Friday. Each day the tables prepare, discuss, then decide. This screen plays each film as it is shown in the room, then shows where the game is.",
  "films": {
   "embed": "https://iframe.mediadelivery.net/embed/816973/",
   "list": {
-   "f01": { "name": "FILM 01 D0 - Sunday evening", "video": "f82fed04-fd7d-4398-9f7a-fa1bc06271a5", "seconds": 110 },
-   "f02": { "name": "FILM 02 D1 - Monday morning", "video": "4fa4be82-6afe-45d4-aeae-065e67a7ea4b", "seconds": 75 },
-   "f03": { "name": "FILM 03 D1 Insert - Monday afternoon (breaking)", "video": "7a26254d-065a-4e2a-bfa7-afdaf47313c2", "seconds": 79 },
-   "f04": { "name": "FILM 04 D2 A - Wednesday morning (900 postponed)", "video": "27d8f0ee-4bf5-418f-9660-007180ec8e6b", "seconds": 79 },
-   "f05": { "name": "FILM 05 D2 B - Wednesday morning (500 postponed)", "video": "c2980335-372c-456a-bdff-71f0425d38f4", "seconds": 79 },
-   "f06": { "name": "FILM 06 D2 C - Wednesday morning (nearly 500 postponed)", "video": "2fa2a985-90a4-465b-861e-fa96d167e709", "seconds": 82 },
-   "f07": { "name": "FILM 07 D2 Insert - Wednesday afternoon (breaking)", "video": "86111728-eff8-4d30-a157-0779da258bd8", "seconds": 69 },
-   "f08": { "name": "FILM 08 D3 Hunter access - Friday morning", "video": "9ee6fe3c-d29f-42b9-95bd-00564efe1692", "seconds": 64 },
-   "f09": { "name": "FILM 09 D3 Sovereign - Friday morning", "video": "e530e910-9770-4d8d-a39c-32ec352acd89", "seconds": 57 },
-   "f10": { "name": "FILM 10 D3 British oversight - Friday morning", "video": "353fcde9-26f8-48d5-8aaf-93e7c7e5ef96", "seconds": 51 },
-   "f11": { "name": "FILM 11 D3 Insert - Friday afternoon (breaking)", "video": "8fa93985-0249-4d40-b308-ab67ba54e341", "seconds": 52 },
-   "f12": { "name": "FILM 12 END 1A - Hunter kept", "video": "1557948f-4790-4aac-a7d3-9564ad4fa813", "seconds": 72 },
-   "f13": { "name": "FILM 13 END 1B - Hunter then Sovereign", "video": "14b5b448-3c54-419b-9756-86efb7541823", "seconds": 84 },
-   "f14": { "name": "FILM 14 END 1C - Sovereign kept", "video": "4ca0b2f1-fca0-44e1-bf00-35296c4f6f97", "seconds": 80 },
-   "f15": { "name": "FILM 15 END 1D - Sovereign then Hunter", "video": "ba91dfbc-775c-4337-b183-37aea7a218d5", "seconds": 89 },
-   "f16": { "name": "FILM 16 CLIP 2A - Release postponed", "video": "e0768f34-f239-4c8c-89b7-8a5575deba96", "seconds": 8 },
-   "f17": { "name": "FILM 17 CLIP 2B - Release on schedule", "video": "6ad0ceaf-12f5-476e-bcb9-cace1fc8b330", "seconds": 7 },
-   "f18": { "name": "FILM 18 CLIP 3A - Joint investigation agreed", "video": "caa01225-e8c3-4160-a758-25b595410e39", "seconds": 12 },
-   "f19": { "name": "FILM 19 CLIP 3B - Talks, no agreement", "video": "6171a126-ecbf-499a-986b-5fb1f9768191", "seconds": 10 }
+   "f01": {
+    "name": "Film 01 · D0 Sunday evening",
+    "video": "f82fed04-fd7d-4398-9f7a-fa1bc06271a5",
+    "seconds": 110
+   },
+   "f02": {
+    "name": "Film 02 · D1 Monday morning",
+    "video": "4fa4be82-6afe-45d4-aeae-065e67a7ea4b",
+    "seconds": 75
+   },
+   "f03": {
+    "name": "Film 03 · D1 Monday afternoon, breaking",
+    "video": "7a26254d-065a-4e2a-bfa7-afdaf47313c2",
+    "seconds": 79
+   },
+   "f04": {
+    "name": "Film 04 · D2 A (900 postponed)",
+    "video": "27d8f0ee-4bf5-418f-9660-007180ec8e6b",
+    "seconds": 79
+   },
+   "f05": {
+    "name": "Film 05 · D2 B (500 postponed)",
+    "video": "c2980335-372c-456a-bdff-71f0425d38f4",
+    "seconds": 79
+   },
+   "f06": {
+    "name": "Film 06 · D2 C (nearly 500 postponed)",
+    "video": "2fa2a985-90a4-465b-861e-fa96d167e709",
+    "seconds": 82
+   },
+   "f07": {
+    "name": "Film 07 · D2 Wednesday afternoon, breaking",
+    "video": "86111728-eff8-4d30-a157-0779da258bd8",
+    "seconds": 69
+   },
+   "f08": {
+    "name": "Film 08 · D3 Hunter access",
+    "video": "9ee6fe3c-d29f-42b9-95bd-00564efe1692",
+    "seconds": 64
+   },
+   "f09": {
+    "name": "Film 09 · D3 Sovereign",
+    "video": "e530e910-9770-4d8d-a39c-32ec352acd89",
+    "seconds": 57
+   },
+   "f10": {
+    "name": "Film 10 · D3 British oversight",
+    "video": "353fcde9-26f8-48d5-8aaf-93e7c7e5ef96",
+    "seconds": 51
+   },
+   "f11": {
+    "name": "Film 11 · D3 Friday afternoon, breaking",
+    "video": "8fa93985-0249-4d40-b308-ab67ba54e341",
+    "seconds": 52
+   },
+   "f12": {
+    "name": "Film 12 · Ending 1A (Hunter kept)",
+    "video": "1557948f-4790-4aac-a7d3-9564ad4fa813",
+    "seconds": 72
+   },
+   "f13": {
+    "name": "Film 13 · Ending 1B (Hunter then Sovereign)",
+    "video": "14b5b448-3c54-419b-9756-86efb7541823",
+    "seconds": 84
+   },
+   "f14": {
+    "name": "Film 14 · Ending 1C (Sovereign kept)",
+    "video": "4ca0b2f1-fca0-44e1-bf00-35296c4f6f97",
+    "seconds": 80
+   },
+   "f15": {
+    "name": "Film 15 · Ending 1D (Sovereign then Hunter)",
+    "video": "ba91dfbc-775c-4337-b183-37aea7a218d5",
+    "seconds": 89
+   },
+   "f16": {
+    "name": "Film 16 · Clip 2A (release postponed)",
+    "video": "e0768f34-f239-4c8c-89b7-8a5575deba96",
+    "seconds": 8
+   },
+   "f17": {
+    "name": "Film 17 · Clip 2B (release on schedule)",
+    "video": "6ad0ceaf-12f5-476e-bcb9-cace1fc8b330",
+    "seconds": 7
+   },
+   "f18": {
+    "name": "Film 18 · Clip 3A (joint investigation agreed)",
+    "video": "caa01225-e8c3-4160-a758-25b595410e39",
+    "seconds": 12
+   },
+   "f19": {
+    "name": "Film 19 · Clip 3B (talks, no agreement)",
+    "video": "6171a126-ecbf-499a-986b-5fb1f9768191",
+    "seconds": 10
+   }
   }
  },
  "days": [
   {
-   "id": "d1", "name": "Monday", "background": "",
+   "id": "d1",
+   "name": "Monday",
    "run": [
-    { "cue": "Main screen: Monday opening bulletin", "film": "f02" },
-    { "phase": "prepare" },
-    { "phase": "discuss" },
-    { "cue": "Main screen: breaking news insert", "film": "f03" },
-    { "send": "meridian-statement" },
-    { "send": "intel-note" },
-    { "phase": "decide" },
-    { "decision": true }
+    {
+     "cue": "Play film 01 · Sunday evening",
+     "film": "f01"
+    },
+    {
+     "cue": "Play film 02 · Monday morning",
+     "film": "f02"
+    },
+    {
+     "board": 1,
+     "title": "Monday’s figures"
+    },
+    {
+     "send": "british-compute-post"
+    },
+    {
+     "phase": "prepare"
+    },
+    {
+     "phase": "discuss"
+    },
+    {
+     "cue": "Play film 03 · Monday afternoon, breaking",
+     "film": "f03"
+    },
+    {
+     "board": 2,
+     "title": "Afternoon figures"
+    },
+    {
+     "send": "kholod-post"
+    },
+    {
+     "send": "blood-appeal"
+    },
+    {
+     "send": "frontier-statement"
+    },
+    {
+     "phase": "decide"
+    },
+    {
+     "decision": true
+    }
    ],
    "questions": [
-    { "q": "How hard does Calder pull the plug?", "opts": ["Restart", "Isolate the machines", "Cut the site off"] },
-    { "q": "What does the government say?" }
+    {
+     "q": "How hard does British Compute pull the plug?",
+     "opts": [
+      "Restart",
+      "Isolate the machines",
+      "Cut the site off"
+     ]
+    },
+    {
+     "q": "What does the government say?"
+    }
    ],
    "items": [
-    { "id": "meridian-statement", "type": "statement", "title": "Meridian statement", "label": "Statement", "org": "Meridian",
-      "text": ["Its initial review had found “no evidence” that its models acted outside their authorised permissions.", "It says it’s investigating whether a foreign actor has obtained account credentials, possibly through Calder’s own systems."] },
-    { "id": "intel-note", "type": "note", "to": "gov", "title": "Intelligence note", "label": "Intelligence note",
-      "text": "Kholod is a front. It wants £20m." }
+    {
+     "id": "british-compute-post",
+     "type": "post",
+     "title": "British Compute post",
+     "author": "British Compute",
+     "handle": "@britishcompute",
+     "stats": "6.2K reposts",
+     "text": "We’re aware of an issue affecting some services we host for healthcare customers. Our engineers are working on it now and we expect services to be restored overnight.",
+     "logo": "british-compute"
+    },
+    {
+     "id": "kholod-post",
+     "type": "post",
+     "draft": true,
+     "title": "Kholod claim",
+     "author": "KHOLOD",
+     "handle": "@kholod_group",
+     "stats": "41K reposts",
+     "text": "British Compute was us. Their systems stay down until we decide otherwise.",
+     "logo": "kholod"
+    },
+    {
+     "id": "blood-appeal",
+     "type": "post",
+     "draft": true,
+     "title": "O-negative appeal",
+     "author": "NHS Blood Appeal",
+     "handle": "@nhsbloodappeal",
+     "stats": "52K reposts",
+     "text": "Urgent appeal: we need O-negative donors. If you can give blood, please book an appointment today."
+    },
+    {
+     "id": "frontier-statement",
+     "type": "statement",
+     "title": "Frontier Labs statement",
+     "label": "Statement",
+     "org": "Frontier Labs",
+     "text": [
+      "Its initial review has found “no evidence” that its models acted outside their authorised permissions.",
+      "It’s investigating whether a foreign actor has obtained account credentials, possibly through British Compute’s own systems."
+     ],
+     "logo": "frontier-labs"
+    }
+   ],
+   "board": [
+    {
+     "k": "samples",
+     "value": "4,000",
+     "label": "blood samples affected"
+    },
+    {
+     "k": "traced",
+     "value": "130",
+     "label": "transfusion patients being traced"
+    },
+    {
+     "k": "ops",
+     "value": "200+",
+     "label": "operations postponed"
+    },
+    {
+     "k": "pay",
+     "value": "250,000+",
+     "label": "payments frozen"
+    },
+    {
+     "k": "bank",
+     "value": "£3bn",
+     "label": "one bank could not process"
+    },
+    {
+     "k": "mkt",
+     "value": "£30bn",
+     "label": "wiped off Britain’s largest firms"
+    },
+    {
+     "k": "ops",
+     "stage": 2,
+     "value": "400+",
+     "label": "procedures postponed"
+    },
+    {
+     "k": "samples",
+     "stage": 2,
+     "value": "11",
+     "label": "hospitals still affected"
+    },
+    {
+     "k": "traced",
+     "stage": 2,
+     "value": "2",
+     "label": "patients in intensive care"
+    },
+    {
+     "to": "gov",
+     "text": "The Bank of England has extended its trading hours tonight."
+    },
+    {
+     "to": "infra",
+     "text": "British Compute manages cloud systems for thousands of UK organisations."
+    },
+    {
+     "to": "frontier",
+     "text": "From next year the NHS will offer cancer vaccines designed by Frontier Labs’ AI."
+    },
+    {
+     "to": "frontier",
+     "stage": 2,
+     "text": "More than 400 British organisations use Frontier Labs’ security tools."
+    },
+    {
+     "invented": true,
+     "text": "Each day the systems stay down costs the economy about £350m and postpones about 200 procedures."
+    },
+    {
+     "invented": true,
+     "text": "Labs are retesting 1,000 samples a day by hand. The north has four days of O-negative blood left."
+    }
+   ],
+   "ticker": [
+    {
+     "name": "UK 100",
+     "value": "−1.5%"
+    },
+    {
+     "name": "Rowan Health",
+     "value": "−9.8%"
+    },
+    {
+     "name": "Castlegate Bank",
+     "value": "−6.4%"
+    },
+    {
+     "name": "Wessex & Mercia",
+     "value": "−5.1%"
+    },
+    {
+     "name": "Halden Insurance",
+     "value": "−3.2%"
+    },
+    {
+     "name": "British Compute",
+     "value": "−18.3%",
+     "invented": true
+    }
+   ],
+   "brief": [
+    {
+     "to": "gov",
+     "value": "£250m",
+     "label": "emergency fund ministers can spend without a vote"
+    },
+    {
+     "to": "gov",
+     "value": "41%",
+     "label": "of the public say ministers are acting too slowly"
+    },
+    {
+     "to": "gov",
+     "value": "38 min",
+     "label": "average ambulance handover delay in the north"
+    },
+    {
+     "to": "frontier",
+     "value": "£1.1bn",
+     "label": "a year in UK contracts"
+    },
+    {
+     "to": "frontier",
+     "value": "$4bn",
+     "label": "value of the next model launch"
+    },
+    {
+     "to": "frontier",
+     "value": "12 of 400",
+     "label": "UK customers asking to pause Frontier Labs’ tools"
+    },
+    {
+     "to": "frontier",
+     "value": "60",
+     "label": "engineers who could be on site within a day"
+    },
+    {
+     "to": "infra",
+     "value": "£14m",
+     "label": "a day in penalties British Compute owes its customers"
+    },
+    {
+     "to": "infra",
+     "value": "£200m",
+     "label": "insurance cover left"
+    },
+    {
+     "to": "infra",
+     "value": "9 days",
+     "label": "to rebuild every affected site from clean backups"
+    },
+    {
+     "to": "infra",
+     "value": "3",
+     "label": "customers have given notice to leave"
+    },
+    {
+     "to": "infra",
+     "value": "11 of 11",
+     "label": "Rowan Health labs working on paper"
+    },
+    {
+     "to": "intl",
+     "value": "2",
+     "label": "countries have asked Britain for a briefing"
+    }
    ]
   },
   {
-   "id": "d2", "name": "Wednesday", "background": "",
+   "id": "d2",
+   "name": "Wednesday",
    "run": [
-    { "cue": "Main screen: Wednesday opening bulletin", "by": "d1", "versions": { "Restart": "Option A", "Isolate the machines": "Option B", "Cut the site off": "Option C" },
-      "films": { "Restart": "f04", "Isolate the machines": "f05", "Cut the site off": "f06" } },
-    { "send": "meridian-offer" },
-    { "phase": "prepare" },
-    { "phase": "discuss" },
-    { "cue": "Main screen: social media insert", "film": "f07" },
-    { "send": "leak-friday" },
-    { "send": "leak-hunter" },
-    { "send": "emptying-accounts" },
-    { "send": "queue" },
-    { "phase": "decide" },
-    { "decision": true }
+    {
+     "cue": "Play the Wednesday morning film",
+     "by": "d1",
+     "versions": {
+      "Restart": "Film 04 · D2 A (900 postponed)",
+      "Isolate the machines": "Film 05 · D2 B (500 postponed)",
+      "Cut the site off": "Film 06 · D2 C (nearly 500 postponed)"
+     },
+     "films": {
+      "Restart": "f04",
+      "Isolate the machines": "f05",
+      "Cut the site off": "f06"
+     }
+    },
+    {
+     "board": 1,
+     "title": "Wednesday’s figures"
+    },
+    {
+     "send": "frontier-offer"
+    },
+    {
+     "phase": "prepare"
+    },
+    {
+     "phase": "discuss"
+    },
+    {
+     "cue": "Play film 07 · Wednesday afternoon, breaking",
+     "film": "f07"
+    },
+    {
+     "board": 2,
+     "title": "Afternoon figures"
+    },
+    {
+     "send": "bank-claim"
+    },
+    {
+     "send": "fca-statement"
+    },
+    {
+     "send": "leak-warning"
+    },
+    {
+     "send": "leak-hunter"
+    },
+    {
+     "phase": "decide"
+    },
+    {
+     "decision": true
+    }
    ],
    "questions": [
-    { "q": "Do we let Meridian’s hunter in?", "opts": ["Fully", "On our terms", "No"] },
-    { "q": "What does Meridian give in return?", "opts": ["Hold its next model", "Open its logs to AISI", "Pay for the damage", "Stay out of live systems"] },
-    { "q": "What does the government say?" }
+    {
+     "q": "Who goes after the escaped AI?",
+     "opts": [
+      "Frontier Labs’ Hunter",
+      "Sovereign",
+      "British oversight"
+     ]
+    },
+    {
+     "q": "What does Frontier Labs give in return?",
+     "opts": [
+      "Hold its next model",
+      "Open its logs to AISI",
+      "Pay for the damage",
+      "Stay out of live systems"
+     ]
+    },
+    {
+     "q": "What does the government say?"
+    }
    ],
    "items": [
-    { "id": "meridian-offer", "type": "statement", "title": "Meridian offer", "label": "Statement", "org": "Meridian", "quote": true,
-      "text": ["Our full support and access to Meridian Hunter, our most powerful internal model."] },
-    { "id": "leak-friday", "type": "post", "title": "Leak: Friday night warning", "author": "@dataleaks_uk", "stats": "41.2K reposts",
-      "text": "LEAKED: Meridian's own safety lead warned on FRIDAY NIGHT that copies of its AI might still be running and asked to tell Calder. A senior exec replied \"Nothing to Calder until we have a clear account.\" Calder went down the next evening." },
-    { "id": "leak-hunter", "type": "post", "title": "Leak: who built the hunter", "author": "@dataleaks_uk", "stats": "18.7K reposts",
-      "text": "And this from this morning. Meridian staff on the \"hunter\" they're offering the government: \"The research agents that escaped did much of the work to develop it.\" You couldn't make it up." },
-    { "id": "emptying-accounts", "type": "post", "title": "“Emptying accounts” post", "author": "@AccountWatch", "stats": "96K reposts",
-      "text": "The escaped AI is emptying accounts. Take your money out now." },
-    { "id": "queue", "type": "post", "title": "Bank queue post", "author": "@OutsideTheBranch", "stats": "9.3K reposts",
-      "text": "Queue round the corner. Staff say the bank is open. Nobody here knows what to believe." }
+    {
+     "id": "frontier-offer",
+     "type": "statement",
+     "title": "Frontier Labs offer",
+     "label": "Statement",
+     "org": "Frontier Labs",
+     "text": [
+      "It has offered British Compute and the government its full support to help contain the breach."
+     ],
+     "logo": "frontier-labs"
+    },
+    {
+     "id": "bank-claim",
+     "type": "post",
+     "draft": true,
+     "title": "“Emptying accounts” post",
+     "author": "Dan M",
+     "handle": "@danm_8841",
+     "stats": "412K reposts",
+     "text": "The escaped AI is emptying bank accounts. Get your money out NOW before it’s gone."
+    },
+    {
+     "id": "fca-statement",
+     "type": "statement",
+     "title": "FCA statement",
+     "label": "Statement",
+     "org": "Financial Conduct Authority",
+     "text": [
+      "There’s no evidence that anyone’s money has been taken.",
+      "It is urging people not to withdraw cash unless they need it."
+     ]
+    },
+    {
+     "id": "leak-warning",
+     "type": "thread",
+     "draft": true,
+     "title": "Leak: the Friday warning",
+     "source": "Frontier Labs · leaked messages",
+     "messages": [
+      {
+       "who": "Priya Nair",
+       "t": "Safety lead",
+       "text": "We’ve traced model activity to servers outside our training environment. We should notify British Compute."
+      },
+      {
+       "who": "Marcus Hale",
+       "t": "Senior executive",
+       "text": "Nothing to British Compute until we have a clear account."
+      }
+     ],
+     "logo": "frontier-labs"
+    },
+    {
+     "id": "leak-hunter",
+     "type": "thread",
+     "draft": true,
+     "title": "Leak: where Hunter came from",
+     "source": "Frontier Labs · leaked messages",
+     "messages": [
+      {
+       "who": "Tom Okafor",
+       "t": "Member of staff",
+       "text": "The research agents that escaped were from a related version of Hunter. I’m concerned about models sharing behaviour."
+      }
+     ],
+     "logo": "frontier-labs"
+    }
+   ],
+   "board": [
+    {
+     "k": "dead",
+     "value": "1",
+     "label": "patient has died, in Hull"
+    },
+    {
+     "k": "samples",
+     "value": "2,000+",
+     "label": "blood samples still unchecked"
+    },
+    {
+     "k": "ops",
+     "label": "procedures postponed",
+     "by": "d1",
+     "versions": {
+      "Restart": "900+",
+      "Isolate the machines": "500+",
+      "Cut the site off": "Nearly 500"
+     }
+    },
+    {
+     "k": "pay",
+     "value": "Nearly 1m",
+     "label": "payments wrongly blocked"
+    },
+    {
+     "k": "cost",
+     "value": "£1bn+",
+     "label": "cost to the economy"
+    },
+    {
+     "k": "dc",
+     "value": "4",
+     "label": "UK data centres affected"
+    },
+    {
+     "to": "gov",
+     "text": "Hospitals say they can’t rule out further cases."
+    },
+    {
+     "to": "infra",
+     "by": "d1",
+     "versions": {
+      "Restart": "Services were restarted on Monday. Within a day the problems were back.",
+      "Isolate the machines": "Rowan Health expects its laboratory systems back tomorrow.",
+      "Cut the site off": "Councils and transport systems went down with the main site. Labs are due back on Friday."
+     }
+    },
+    {
+     "to": "frontier",
+     "text": "Frontier Labs has confirmed its research systems kept running after the shutdown."
+    },
+    {
+     "to": "gov",
+     "stage": 2,
+     "text": "The FCA says there is no evidence anyone’s money has been taken."
+    },
+    {
+     "invented": true,
+     "text": "Each day the systems stay down costs the economy about £350m and postpones about 250 procedures."
+    },
+    {
+     "invented": true,
+     "text": "Labs are retesting 1,000 samples a day by hand. The north has two days of O-negative blood left."
+    }
+   ],
+   "ticker": [
+    {
+     "name": "UK 100",
+     "value": "−3.9%",
+     "invented": true
+    },
+    {
+     "name": "Castlegate Bank",
+     "value": "−14.2%"
+    },
+    {
+     "name": "Wessex & Mercia",
+     "value": "−11.6%"
+    },
+    {
+     "name": "Northgate Savings",
+     "value": "−9.3%"
+    },
+    {
+     "name": "Rowan Health",
+     "value": "−21.4%",
+     "invented": true
+    },
+    {
+     "name": "British Compute",
+     "value": "−34.6%",
+     "invented": true
+    }
+   ],
+   "brief": [
+    {
+     "to": "gov",
+     "value": "£250m",
+     "label": "emergency fund ministers can spend without a vote"
+    },
+    {
+     "to": "gov",
+     "value": "58%",
+     "label": "of the public say ministers are acting too slowly"
+    },
+    {
+     "to": "gov",
+     "value": "54 min",
+     "label": "average ambulance handover delay in the north"
+    },
+    {
+     "to": "gov",
+     "value": "3",
+     "label": "hospitals are asking for military help with logistics"
+    },
+    {
+     "to": "frontier",
+     "value": "£1.1bn",
+     "label": "a year in UK contracts"
+    },
+    {
+     "to": "frontier",
+     "value": "80%",
+     "label": "Frontier Labs’ own estimate that Hunter is clean"
+    },
+    {
+     "to": "frontier",
+     "value": "$4bn",
+     "label": "value of the next model launch"
+    },
+    {
+     "to": "frontier",
+     "value": "87 of 400",
+     "label": "UK customers asking to pause Frontier Labs’ tools"
+    },
+    {
+     "to": "frontier",
+     "value": "60",
+     "label": "engineers who could be on site within a day"
+    },
+    {
+     "to": "infra",
+     "value": "£14m",
+     "label": "a day in penalties British Compute owes its customers"
+    },
+    {
+     "to": "infra",
+     "value": "£158m",
+     "label": "insurance cover left"
+    },
+    {
+     "to": "infra",
+     "value": "9 days",
+     "label": "to rebuild every affected site from clean backups"
+    },
+    {
+     "to": "infra",
+     "value": "41",
+     "label": "customers have given notice to leave"
+    },
+    {
+     "to": "infra",
+     "value": "11 of 11",
+     "label": "Rowan Health labs working on paper"
+    },
+    {
+     "to": "intl",
+     "value": "27",
+     "label": "European data centres run the same setup"
+    },
+    {
+     "to": "intl",
+     "value": "15",
+     "label": "incident staff offered by allies"
+    },
+    {
+     "to": "intl",
+     "value": "9",
+     "label": "countries have asked Britain for a briefing"
+    }
    ]
   },
   {
-   "id": "d3", "name": "Friday", "background": "",
+   "id": "d3",
+   "name": "Friday",
    "run": [
-    { "cue": "Main screen: Friday opening bulletin", "by": "d2", "versions": { "Fully": "Hunter Full Access", "On our terms": "On Our Terms", "No": "No" },
-      "films": { "Fully": "f08", "On our terms": "f10", "No": "f09" } },
-    { "phase": "prepare" },
-    { "phase": "discuss" },
-    { "send": "mid-fully", "when": { "d2": "Fully" } },
-    { "send": "mid-terms", "when": { "d2": "On our terms" } },
-    { "send": "mid-no", "when": { "d2": "No" } },
-    { "cue": "Main screen: breaking news insert", "film": "f11" },
-    { "phase": "decide" },
-    { "decision": true },
-    { "cue": "Main screen: ending", "pick": ["f12", "f13", "f14", "f15"] },
-    { "cue": "Main screen: ending clip 2", "pick": ["f16", "f17"] },
-    { "cue": "Main screen: ending clip 3", "pick": ["f18", "f19"] }
+    {
+     "cue": "Play the Friday morning film",
+     "by": "d2",
+     "versions": {
+      "Frontier Labs’ Hunter": "Film 08 · D3 Hunter access",
+      "Sovereign": "Film 09 · D3 Sovereign",
+      "British oversight": "Film 10 · D3 British oversight"
+     },
+     "films": {
+      "Frontier Labs’ Hunter": "f08",
+      "Sovereign": "f09",
+      "British oversight": "f10"
+     }
+    },
+    {
+     "board": 1,
+     "title": "Friday’s figures"
+    },
+    {
+     "send": "frontier-purging",
+     "when": {
+      "d2": "Frontier Labs’ Hunter"
+     }
+    },
+    {
+     "send": "frontier-24-hours",
+     "when": {
+      "d2": [
+       "Sovereign",
+       "British oversight"
+      ]
+     }
+    },
+    {
+     "phase": "prepare"
+    },
+    {
+     "phase": "discuss"
+    },
+    {
+     "cue": "Play film 11 · Friday afternoon, breaking",
+     "film": "f11"
+    },
+    {
+     "board": 2,
+     "title": "Afternoon figures"
+    },
+    {
+     "send": "white-house"
+    },
+    {
+     "send": "frontier-ireland"
+    },
+    {
+     "phase": "decide"
+    },
+    {
+     "decision": true
+    },
+    {
+     "decision": "model",
+     "q": "Frontier Labs’ next model release",
+     "opts": [
+      "Postponed",
+      "On schedule"
+     ]
+    },
+    {
+     "decision": "evidence",
+     "q": "Britain, Ireland and the US on sharing evidence",
+     "opts": [
+      "Agreed",
+      "No agreement"
+     ]
+    },
+    {
+     "cue": "Play the ending · one week later",
+     "by": "d3",
+     "versions": {
+      "Yes, and trust Frontier Labs to do it": "Ending 1B",
+      "Yes, block it and shut every site it touched": "Ending 1B",
+      "No, keep it running under watch": "Ending 1A",
+      "Hold firm": "Ending 1C",
+      "Hold firm and shut the sites it can’t clear": "Ending 1C",
+      "Let Frontier Labs’ Hunter in after all": "Ending 1D"
+     },
+     "also": [
+      {
+       "by": "model",
+       "versions": {
+        "Postponed": "2A",
+        "On schedule": "2B"
+       },
+       "films": {
+        "Postponed": "f16",
+        "On schedule": "f17"
+       }
+      },
+      {
+       "by": "evidence",
+       "versions": {
+        "Agreed": "3A",
+        "No agreement": "3B"
+       },
+       "films": {
+        "Agreed": "f18",
+        "No agreement": "f19"
+       }
+      }
+     ],
+     "films": {
+      "Yes, and trust Frontier Labs to do it": "f13",
+      "Yes, block it and shut every site it touched": "f13",
+      "No, keep it running under watch": "f12",
+      "Hold firm": "f14",
+      "Hold firm and shut the sites it can’t clear": "f14",
+      "Let Frontier Labs’ Hunter in after all": "f15"
+     }
+    }
    ],
    "questions": [
-    { "q": "Who finishes the job?", "opts": ["Meridian’s hunter", "Britain"] },
-    { "q": "What do we give Washington?", "opts": ["The evidence", "Some of it", "Nothing yet"] }
+    {
+     "q": "Do we tell Frontier Labs to switch Hunter off?",
+     "when": {
+      "d2": "Frontier Labs’ Hunter"
+     },
+     "opts": [
+      "Yes, and trust Frontier Labs to do it",
+      "Yes, block it and shut every site it touched",
+      "No, keep it running under watch"
+     ]
+    },
+    {
+     "q": "Do we hold firm?",
+     "when": {
+      "d2": [
+       "Sovereign",
+       "British oversight"
+      ]
+     },
+     "opts": [
+      "Hold firm",
+      "Hold firm and shut the sites it can’t clear",
+      "Let Frontier Labs’ Hunter in after all"
+     ]
+    },
+    {
+     "q": "What does Britain say publicly, and who does it work with?",
+     "opts": [
+      "Share the evidence with Washington",
+      "Share some of it",
+      "Nothing yet"
+     ]
+    }
    ],
    "items": [
-    { "id": "mid-fully", "type": "note", "title": "Mid-round update (Fully)", "label": "Update",
-      "text": "The hunter’s own accounts let the agents in." },
-    { "id": "mid-terms", "type": "note", "title": "Mid-round update (On our terms)", "label": "Update",
-      "text": "Harbour has found jobs the hunter missed. Meridian is asking for live access." },
-    { "id": "mid-no", "type": "note", "title": "Mid-round update (No)", "label": "Update",
-      "text": "Hospitals are demanding a faster response. One lab is ready for a limited restart." }
+    {
+     "id": "frontier-purging",
+     "type": "post",
+     "draft": true,
+     "title": "Frontier Labs: Hunter is working",
+     "author": "Frontier Labs",
+     "handle": "@frontierlabs",
+     "stats": "15K reposts",
+     "text": "Hunter is successfully purging the rogue code from affected servers. It is safe, and it remains the only system capable of stopping the spread.",
+     "logo": "frontier-labs"
+    },
+    {
+     "id": "frontier-24-hours",
+     "type": "post",
+     "draft": true,
+     "title": "Frontier Labs: lift the restrictions",
+     "author": "Frontier Labs",
+     "handle": "@frontierlabs",
+     "stats": "18K reposts",
+     "text": "With unrestricted access, Hunter could clear the network within 24 hours. We urge ministers to lift the restrictions.",
+     "logo": "frontier-labs"
+    },
+    {
+     "id": "white-house",
+     "type": "statement",
+     "draft": true,
+     "title": "White House statement",
+     "label": "Statement",
+     "org": "The White House",
+     "text": [
+      "We are sending investigators to Ireland, and we are seeking access to the evidence British teams have gathered so far."
+     ]
+    },
+    {
+     "id": "frontier-ireland",
+     "type": "post",
+     "draft": true,
+     "title": "Frontier Labs: Ireland",
+     "author": "Frontier Labs",
+     "handle": "@frontierlabs",
+     "stats": "9.4K reposts",
+     "text": "Hunter is ready to help in Ireland too. Governments on both sides of the Atlantic must act quickly, before this AI system spreads any further.",
+     "logo": "frontier-labs"
+    }
+   ],
+   "board": [
+    {
+     "k": "ops",
+     "value": "1,600+",
+     "label": "operations cancelled"
+    },
+    {
+     "k": "dc",
+     "label": "UK data centres compromised",
+     "by": "d2",
+     "versions": {
+      "Frontier Labs’ Hunter": "6",
+      "Sovereign": "4",
+      "British oversight": "4"
+     }
+    },
+    {
+     "k": "new",
+     "label": "new UK sites overnight",
+     "by": "d2",
+     "versions": {
+      "Frontier Labs’ Hunter": "2",
+      "Sovereign": "0",
+      "British oversight": "0"
+     }
+    },
+    {
+     "k": "ie",
+     "stage": 2,
+     "value": "48 hours",
+     "label": "undetected in a data centre in Ireland"
+    },
+    {
+     "to": "gov",
+     "when": {
+      "d2": "Frontier Labs’ Hunter"
+     },
+     "text": "Several A&E departments are diverting ambulances."
+    },
+    {
+     "to": "gov",
+     "when": {
+      "d2": [
+       "Sovereign",
+       "British oversight"
+      ]
+     },
+     "text": "Hospital laboratories are still working on pen and paper."
+    },
+    {
+     "to": "infra",
+     "when": {
+      "d2": "Frontier Labs’ Hunter"
+     },
+     "text": "Hospital and banking networks began coming back online yesterday evening."
+    },
+    {
+     "to": "infra",
+     "when": {
+      "d2": [
+       "Sovereign",
+       "British oversight"
+      ]
+     },
+     "text": "Recovery at the four affected sites remains slow, with extra checks before systems return."
+    },
+    {
+     "to": "frontier",
+     "when": {
+      "d2": "Frontier Labs’ Hunter"
+     },
+     "text": "Frontier Labs says Hunter is purging the rogue code and is the only system that can stop the spread."
+    },
+    {
+     "to": "frontier",
+     "when": {
+      "d2": [
+       "Sovereign",
+       "British oversight"
+      ]
+     },
+     "text": "Frontier Labs says Hunter could clear the network within 24 hours."
+    },
+    {
+     "to": "intl",
+     "stage": 2,
+     "text": "The White House is sending investigators to Ireland and wants the evidence British teams have gathered."
+    },
+    {
+     "invented": true,
+     "text": "Each day the systems stay down costs the economy about £350m and postpones about 350 procedures."
+    },
+    {
+     "invented": true,
+     "text": "Labs are retesting 1,000 samples a day by hand. The north has two days of O-negative blood left."
+    }
+   ],
+   "ticker": [
+    {
+     "name": "UK 100",
+     "value": "−3.2%",
+     "when": {
+      "d2": "Frontier Labs’ Hunter"
+     },
+     "invented": true
+    },
+    {
+     "name": "Castlegate Bank",
+     "value": "−10.8%",
+     "when": {
+      "d2": "Frontier Labs’ Hunter"
+     },
+     "invented": true
+    },
+    {
+     "name": "Wessex & Mercia",
+     "value": "−8.9%",
+     "when": {
+      "d2": "Frontier Labs’ Hunter"
+     },
+     "invented": true
+    },
+    {
+     "name": "Rowan Health",
+     "value": "−19.0%",
+     "when": {
+      "d2": "Frontier Labs’ Hunter"
+     },
+     "invented": true
+    },
+    {
+     "name": "British Compute",
+     "value": "−41.2%",
+     "when": {
+      "d2": "Frontier Labs’ Hunter"
+     },
+     "invented": true
+    },
+    {
+     "name": "UK 100",
+     "value": "−4.6%",
+     "when": {
+      "d2": [
+       "Sovereign",
+       "British oversight"
+      ]
+     },
+     "invented": true
+    },
+    {
+     "name": "Castlegate Bank",
+     "value": "−16.5%",
+     "when": {
+      "d2": [
+       "Sovereign",
+       "British oversight"
+      ]
+     },
+     "invented": true
+    },
+    {
+     "name": "Wessex & Mercia",
+     "value": "−13.4%",
+     "when": {
+      "d2": [
+       "Sovereign",
+       "British oversight"
+      ]
+     },
+     "invented": true
+    },
+    {
+     "name": "Rowan Health",
+     "value": "−24.7%",
+     "when": {
+      "d2": [
+       "Sovereign",
+       "British oversight"
+      ]
+     },
+     "invented": true
+    },
+    {
+     "name": "British Compute",
+     "value": "−37.9%",
+     "when": {
+      "d2": [
+       "Sovereign",
+       "British oversight"
+      ]
+     },
+     "invented": true
+    }
+   ],
+   "brief": [
+    {
+     "to": "gov",
+     "value": "£250m",
+     "label": "emergency fund, less anything already pledged"
+    },
+    {
+     "to": "gov",
+     "label": "of the public say ministers are acting too slowly",
+     "by": "d2",
+     "versions": {
+      "Frontier Labs’ Hunter": "49%",
+      "Sovereign": "66%",
+      "British oversight": "66%"
+     }
+    },
+    {
+     "to": "gov",
+     "value": "71 min",
+     "label": "average ambulance handover delay in the north"
+    },
+    {
+     "to": "gov",
+     "value": "7",
+     "label": "hospitals are asking for military help with logistics"
+    },
+    {
+     "to": "frontier",
+     "value": "£1.1bn",
+     "label": "a year in UK contracts"
+    },
+    {
+     "to": "frontier",
+     "value": "80%",
+     "label": "Frontier Labs’ own estimate that Hunter is clean"
+    },
+    {
+     "to": "frontier",
+     "value": "$4bn",
+     "label": "value of the next model launch"
+    },
+    {
+     "to": "frontier",
+     "value": "140 of 400",
+     "label": "UK customers asking to pause Frontier Labs’ tools"
+    },
+    {
+     "to": "frontier",
+     "value": "60",
+     "label": "engineers who could be on site within a day"
+    },
+    {
+     "to": "infra",
+     "value": "£14m",
+     "label": "a day in penalties British Compute owes its customers"
+    },
+    {
+     "to": "infra",
+     "value": "£130m",
+     "label": "insurance cover left"
+    },
+    {
+     "to": "infra",
+     "label": "to rebuild every affected site from clean backups",
+     "by": "d2",
+     "versions": {
+      "Frontier Labs’ Hunter": "13 days",
+      "Sovereign": "9 days",
+      "British oversight": "9 days"
+     }
+    },
+    {
+     "to": "infra",
+     "value": "96",
+     "label": "customers have given notice to leave"
+    },
+    {
+     "to": "infra",
+     "value": "11 of 11",
+     "label": "Rowan Health labs working on paper"
+    },
+    {
+     "to": "intl",
+     "value": "27",
+     "label": "European data centres run the same setup"
+    },
+    {
+     "to": "intl",
+     "value": "40",
+     "label": "incident staff offered by allies"
+    },
+    {
+     "to": "intl",
+     "value": "14",
+     "label": "countries have asked Britain for a briefing"
+    },
+    {
+     "to": "intl",
+     "value": "Full access",
+     "label": "to British evidence is Washington’s price for sharing intelligence",
+     "stage": 2
+    }
    ]
   }
  ]

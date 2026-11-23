@@ -6,7 +6,7 @@
 <!-- Game master. /gm. Phone first.
      Run: the day as a list, in order, with one big button for the next step. When the next step is the day's decision, the button
      becomes the choices; the answer picks which bulletin version and follow-ups the later days show. A film cue also starts that film on the
-     observer page (/watch): tap it as the film starts in the room. Where the app can't tell which version, the button becomes the versions. Everything else on the page is an override.
+     observers' screen (/watch): tap it as the film starts in the room. Where the app can't tell which version, the button becomes the versions. Everything else on the page is an override.
      Setup: minutes and tables. If the server has a key set (AIGI_KEY) it is asked for once and kept on the device. -->
 <style>
 @font-face { font-family: "Schibsted Grotesk"; font-weight: 400 900; src: url("fonts/schibsted-grotesk-latin-wght-normal.woff2") format("woff2"); }
@@ -54,7 +54,6 @@ textarea { width: 100%; min-height: 70px; resize: vertical; } .note .row { margi
 .chip input { background: none; border: 0; padding: 6px 2px 6px 8px; font-size: 14px; field-sizing: content; min-width: 3ch; max-width: 240px; } .chip .x { font-size: 16px; padding: 4px 9px 4px 5px; }
 .add { border-style: dashed; border-radius: 99px; padding: 6px 12px; font-size: 13px; width: 110px; opacity: .7; } #addteam { width: 100%; margin-top: 14px; border-radius: 4px; padding: 12px; }
 .hint { font-size: 13px; color: var(--soft); margin: 8px 2px 0; line-height: 1.4; } .hint a { color: var(--blue); }
-#choose button small { display: block; font-size: 12px; letter-spacing: .1em; color: #23479E; margin-bottom: 2px; }
 details { margin-top: 14px; } summary { cursor: pointer; font-weight: 700; color: var(--blue); padding: 6px 2px; }
 .big { display: block; width: 100%; margin-top: 34px; padding: 15px; border: 1.5px solid var(--line); border-radius: 4px; font-weight: 800; text-align: center; }
 .link { color: var(--soft); font-size: 13px; text-decoration: underline; padding: 0; margin-top: 16px; }
@@ -74,7 +73,7 @@ details { margin-top: 14px; } summary { cursor: pointer; font-weight: 700; color
   <h2>Run sheet <button id="back">Step back</button></h2><div id="steps"></div>
   <h2>Tables <button id="identify">Identify</button></h2><div class="tables" id="tables"></div>
   <h2>Observers <button id="stopfilm" hidden>Stop film</button></h2><div class="tables" id="obs"></div>
-  <p class="hint">A film cue in the run sheet starts that film for observers. Tap it as the film starts in the room. <a href="watch" target="_blank">Observer page</a></p>
+  <p class="hint">A film cue in the run sheet starts that film on the observers' screen. Tap it as the film starts in the room. <a href="watch" target="_blank">Observers' screen</a></p>
   <details><summary>Play any film for observers</summary><div id="films"></div></details>
   <h2>More to send</h2><div id="items"></div>
   <div class="note" style="margin-top:14px"><textarea id="note" placeholder="Type a note to send"></textarea><div class="row"><select id="to"></select><button class="pill" id="sendnote">Send</button></div></div>
@@ -103,20 +102,23 @@ const sentKey = (id, to) => `${v.day}:${id}:${to}`, isSent = (id, to) => v.sent.
 // a step in words: what the big button and the list say
 const dayName = (id) => (v.days.find((d) => d.id === id) || {}).name || id;
 // a step tied to an earlier decision shows only for that decision; until the decision is recorded it shows, marked "if ..."
-const visible = (s) => !s.when || Object.entries(s.when).every(([d, c]) => !v.decisions[d] || v.decisions[d] === c);
+const visible = (s) => !s.when || Object.entries(s.when).every(([d, c]) => !v.decisions[d] || [].concat(c).includes(v.decisions[d]));
+// the day's recorded question: the first one whose 'when' fits the decisions so far
+const firstQ = () => today().questions.find((q) => !q.when || Object.entries(q.when).every(([d, c]) => [].concat(c).includes(v.decisions[d]))) || today().questions[0];
 const nextIdx = () => { const r = run(); let i = v.step; while (i < r.length && !visible(r[i])) i++; return i; };
-// a film cue: the one film the app can name by itself, or else the versions the game master picks from
-const filmOf = (s) => s.film || (s.films && s.films[v.decisions[s.by]]) || '';
-const filmPick = (s) => filmOf(s) ? [] : (s.pick || Object.values(s.films || {})).filter((id) => v.films[id]);
+// a film cue: its first film is the one film, or the version for an earlier decision. If that decision isn't recorded the game master picks the version.
+const hasFilm = (s) => !!(s.film || s.films);
+const filmPick = (s) => s.films && !s.films[v.decisions[s.by]] ? [...new Set(Object.values(s.films))].filter((id) => v.films[id]) : [];
 const filmName = (id) => (v.films[id] || {}).name || id;
 function stepText(s) {
-  const iff = s.when ? Object.entries(s.when).filter(([d]) => !v.decisions[d]).map(([, c]) => 'if ' + c).join(', ') : '';
+  const iff = s.when ? Object.entries(s.when).filter(([d]) => !v.decisions[d]).map(([, c]) => 'if ' + [].concat(c).join(' or ')).join(', ') : '';
   if (s.phase) { const p = v.phases.find((x) => x.id === s.phase); return { kind: 'Start', title: p.name, sub: `${p.minutes} min` }; }
   if (s.send) { const it = today().items.find((x) => x.id === s.send) || { title: s.send }; return { kind: 'Send', title: it.title, sub: [seatName(s.to || it.to || 'all'), iff].filter(Boolean).join(' · ') }; }
-  if (s.decision) { const q = today().questions[0]; return { kind: 'Decision', title: q.q, sub: v.decisions[v.day] || '', opts: q.opts || [] }; }
-  let sub = iff; if (s.by) { const c = v.decisions[s.by]; sub = c ? `${(s.versions || {})[c] || c} · ${dayName(s.by)}: ${c}` : `Version depends on ${dayName(s.by)}'s decision, which isn't recorded`; }
-  const f = filmOf(s), pick = filmPick(s); if (f) sub = [filmName(f), s.by ? `${dayName(s.by)}: ${v.decisions[s.by]}` : iff].filter(Boolean).join(' · '); else if (pick.length && !s.by) sub = 'Choose which one played';
-  return { kind: 'Cue', title: s.cue, sub, film: f, pick };
+  if (s.board) return { kind: 'Show', title: s.title || 'Background figures', sub: 'Every table' };
+  if (s.decision) { const own = typeof s.decision === 'string', q = own ? s : firstQ(), key = own ? s.decision : v.day; return { kind: 'Decision', title: q.q, sub: v.decisions[key] || '', opts: q.opts || [], key }; }
+  let sub = iff; if (s.by) { const parts = [s].concat(s.also || []).map((p) => { const c = v.decisions[p.by]; return c ? (p.versions || {})[c] || c : ''; }), c = v.decisions[s.by];   // 'also' adds more parts to the film's name
+    sub = parts.every(Boolean) ? parts.join(' + ') + (s.also ? '' : ` · ${dayName(s.by)}: ${c}`) : parts.some(Boolean) ? parts.map((x) => x || '?').join(' + ') + ' · a decision isn’t recorded' : `Depends on ${dayName(s.by)}'s decision, which isn't recorded`; }
+  return { kind: 'Cue', title: s.cue, sub, film: hasFilm(s), pick: filmPick(s) };
 }
 
 function lock(msg) { if (es) es.close(); store.set('aigi-gm-key', ''); key = ''; document.body.classList.add('locked'); $('msg').textContent = msg || ''; $('key').value = ''; }
@@ -141,8 +143,8 @@ function render() {
   $('days').innerHTML = v.days.map((d) => `<button data-day="${d.id}" class="${d.id === v.day ? 'on' : ''}">${esc(d.name)}</button>`).join('');
   const ni = nextIdx(), ci = choosing >= 0 ? choosing : (steps[ni] && (steps[ni].decision || filmPick(steps[ni]).length) ? ni : -1), s = steps[ni], t = s && stepText(s);
   $('choose').hidden = ci < 0; $('next').hidden = ci >= 0;
-  if (ci >= 0 && !steps[ci].decision) { const q = stepText(steps[ci]); $('choose').innerHTML = `<small>Film · tap as it starts in the room</small><b>${esc(q.title)}</b><div>${q.pick.map((id) => `<button data-film="${esc(id)}" data-at="${ci}">${esc(filmName(id))}</button>`).join('')}</div>`; }
-  else if (ci >= 0) { const q = stepText(steps[ci]); $('choose').innerHTML = `<small>Decision</small><b>${esc(q.title)}</b><div>${q.opts.map((o) => `<button data-choice="${esc(o)}" data-at="${ci}" class="${v.decisions[v.day] === o ? 'on' : ''}">${esc(o)}</button>`).join('')}</div>`; }
+  if (ci >= 0 && !steps[ci].decision) { const q = stepText(steps[ci]); $('choose').innerHTML = `<small>Film · tap the one that is starting in the room</small><b>${esc(q.title)}</b><div>${q.pick.map((id) => `<button data-film="${esc(id)}" data-at="${ci}">${esc(filmName(id))}</button>`).join('')}</div>`; }
+  else if (ci >= 0) { const q = stepText(steps[ci]); $('choose').innerHTML = `<small>Decision</small><b>${esc(q.title)}</b><div>${q.opts.map((o) => `<button data-choice="${esc(o)}" data-at="${ci}" class="${v.decisions[q.key] === o ? 'on' : ''}">${esc(o)}</button>`).join('')}</div>`; }
   $('next').innerHTML = t ? `<small>Next · ${t.film ? 'Film, tap as it starts' : t.kind}</small><b>${esc(t.title)}</b>${t.sub ? `<span>${esc(t.sub)}</span>` : ''}`
     : nextDay ? `<small>${esc(day.name)} is done</small><b>Go to ${esc(nextDay.name)}</b>` : `<small>${esc(day.name)} is done</small><b>That's the last step</b>`;
   $('next').disabled = Date.now() < hold || (!t && !nextDay);
@@ -175,9 +177,9 @@ function tick() {
   if (!v) return;
   const f = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   if ($('next').disabled && Date.now() >= hold && (run()[nextIdx()] || v.days[v.days.findIndex((d) => d.id === v.day) + 1])) $('next').disabled = false;
-  const fl = v.film && v.films[v.film.id], left = fl ? Math.ceil((v.film.at + fl.seconds * 1000 - (Date.now() + offset)) / 1000) : 0;
-  $('obs').innerHTML = `<span class="${v.watching ? 'up' : ''}">${v.watching || 0} watching</span>` + (fl ? `<span class="${left > 0 ? 'up' : ''}">${left > 0 ? 'Playing' : 'Last film'}: ${esc(fl.name)}${left > 0 ? ' · ' + f(left) + ' left' : ''}</span>` : '');
-  $('stopfilm').hidden = !(fl && left > 0);
+  const fl = ((v.film || {}).ids || []).filter((id) => v.films[id]), left = fl.length ? Math.ceil((v.film.at + fl.reduce((n, id) => n + v.films[id].seconds, 0) * 1000 - (Date.now() + offset)) / 1000) : 0;
+  $('obs').innerHTML = `<span class="${v.watching ? 'up' : ''}">${v.watching || 0} watching</span>` + (fl.length ? `<span class="${left > 0 ? 'up' : ''}">${left > 0 ? 'Playing' : 'Last film'}: ${esc(fl.map(filmName).join(' + '))}${left > 0 ? ' · ' + f(left) + ' left' : ''}</span>` : '');
+  $('stopfilm').hidden = !(fl.length && left > 0);
   if (!v.phase) { $('t').textContent = '00:00'; $('t').className = 't idle'; $('s').textContent = 'Standing by'; return; }
   const ms = v.running ? v.endsAt - (Date.now() + offset) : v.remainingMs, over = ms <= 0, name = v.phases.find((p) => p.id === v.phase).name;
   $('t').textContent = over ? '+' + f(Math.floor(-ms / 1000)) : f(Math.ceil(ms / 1000)); $('t').className = 't' + (over ? ' over' : '');
@@ -191,7 +193,7 @@ document.addEventListener('click', (e) => {
   else if (b.id === 'next') { hold = Date.now() + 1500; b.disabled = true;   // a double tap must not run two steps
     if (run()[nextIdx()]) cmd('step', { i: nextIdx() }); else { const n = v.days[v.days.findIndex((x) => x.id === v.day) + 1]; const left = v.phase && (v.running ? v.endsAt - (Date.now() + offset) : v.remainingMs) > 0;
       if (n && (!left || confirm(`The clock is still running. Go to ${n.name} anyway?`))) cmd('day', { day: n.id }); } }
-  else if (d.choice) { if (Date.now() < hold) return; hold = Date.now() + 1500; const at = +d.at; choosing = -1; cmd('decide', { i: at >= v.step ? at : undefined, choice: d.choice }); }
+  else if (d.choice) { if (Date.now() < hold) return; hold = Date.now() + 1500; const at = +d.at; choosing = -1; cmd('decide', { i: at, choice: d.choice }); }
   else if (d.film) { if (Date.now() < hold) return; hold = Date.now() + 1500; choosing = -1; cmd('step', { i: +d.at, film: d.film }); }
   else if (d.play) { if (confirm(`Play this for observers now?\n${filmName(d.play)}`)) cmd('film', { id: d.play }); }
   else if (b.id === 'stopfilm') { if (confirm('Stop the film for observers?')) cmd('filmStop'); }

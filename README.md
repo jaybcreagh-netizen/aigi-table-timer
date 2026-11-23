@@ -10,20 +10,22 @@ It prints the links.
 
 | Address | Who | What |
 |---|---|---|
-| `/` | everyone | The portal: Participant or Game master |
+| `/` | everyone | The portal: Participant, Observer or Game master |
 | `/play` | participants | Pick a table once; the device remembers it. Or open a table's own link from Setup |
 | `/watch` | observers | A screen for the observers' monitor: plays each film in full quality as it is shown in the room, then shows where the game is |
 | `/gm` | game master | Open to anyone with the address, unless a key is set (`AIGI_KEY=... node table/server.js`) |
 
 ## Game master
 
-- **Run** is the day as a list, in order, with one big **Next** button: start a phase, send an item, or tick off a main-screen cue. After Decide the button becomes the day's choices: tap what the room decided. That answer names the bulletin version on the next day's cue ("Option B", "On Our Terms") and keeps only the follow-ups that fit. Tap the decision's line in the run sheet to change it. Tap any line in the run sheet to do it out of order (it asks first). Pause, −1 / +1 min and End act on the running clock. **Identify** makes every tablet show its table name for a few seconds. Anything not in the run sheet, and a box for typing a one-off note, sits under "More to send".
-- A **film cue** ("Main screen: ...") also starts that film on the observer page, so tap it as the film starts in the room. If the film has versions, the app picks the one that fits the recorded decision; if it can't tell, the button becomes the versions and you tap the one that played. **Observers** shows how many are watching, what is playing, and **Stop film**. "Play any film for observers" starts one out of order; FILM 01 (Sunday evening) is only there, because people get it before the exercise starts and it is not a step in Monday's run sheet: play it from this list if the observers should see it on their monitor.
+- **Run** is the day as a list, in order, with one big **Next** button: start a phase, send an item, or tick off a main-screen cue. After Decide the button becomes the day's choices: tap what the room decided. That answer names the bulletin version on the next day's cue ("Option B", "Sovereign") and keeps only the follow-ups that fit. Tap the decision's line in the run sheet to change it. Tap any line in the run sheet to do it out of order (it asks first). Pause, −1 / +1 min and End act on the running clock. **Identify** makes every tablet show its table name for a few seconds. Anything not in the run sheet, and a box for typing a one-off note, sits under "More to send".
+- A **film cue** ("Play film 02 · Monday morning") also starts that film on the observers' screen, so tap it as the film starts in the room. If the film has versions, the app plays the one that fits the recorded decision; if that decision isn't recorded, the button becomes the versions and you tap the one that is starting. The ending plays its parts back to back (Ending 1D, then 2A, then 3B); a part whose outcome isn't recorded is left out. **Observers** shows how many screens are watching, what is playing, and **Stop film**. "Play any film for observers" starts one out of order.
 - **Setup** has the minutes, the tables (add, rename, remove, each with its own link) and **Reset for the real run**.
 
 ## Participants
 
 Before the first phase a tablet shows its table's name. Then the phase and the clock. Items arrive beside the clock; tap one to read it full screen. At Decide the day's questions appear. The last minute pulses, and at zero the screen turns white.
+
+When the run reaches a **Show figures** step, a background board appears under the clock: up to six of the day's figures, one or two lines for that table only, and a slow ticker of share prices along the bottom. The figures follow the decisions recorded so far and update again in the afternoon. At the same step each table also gets a card of figures only it can see, at the top of its briefing column. Which figures are invented, and what each leans on, is in `FIGURES-DRAFT.md`.
 
 A tablet stays on its table: hold the table's name for three seconds to change it. A device is only ever sent items addressed to everyone, its table or its role.
 
@@ -33,20 +35,20 @@ A tablet stays on its table: hold the table's name for three seconds to change i
 
 - Open it in Chrome, full screen, and tap **Start with sound** once. A browser will not start a film with sound until someone has tapped the page. If the page is ever reloaded it needs that tap again.
 - When the game master taps a film cue, the film plays full screen. The server sends the film and the time it started, so a screen that is opened late or reloaded lands at the right point.
+- Between films it shows the day, the stage and its clock, the background board's figures and ticker (only the rows that go to every table), what has been decided so far, the Decide questions (during Decide only, as on the tablets), and whatever went to every table. Anything addressed to one table or role, each table's private figures, and Friday's two game-master-only outcomes are never sent to this screen.
+- The screen is only ever sent the films that are playing, never the versions the room didn't pick.
 - On a wide screen nothing scrolls and the text is sized to be read across a room: the newest things are at the top and the oldest fall off the bottom. On a person's own laptop or phone the same address works and scrolls.
-- When the film ends the page shows the day, the stage and its clock, what has been decided so far, the Decide questions (during Decide only, as on the tablets), and whatever went to every table. Items sent to one table or role are never sent to this page.
-- The page is only ever sent the film that is playing, never the versions the room didn't pick.
 - Zoom also carries the room's sound, a little late, so observers can hear a film twice. Whoever looks after the observers' screens turns Zoom's sound down while a film plays, or the room microphone is muted for it.
 
-The films are on Bunny Stream and play in Bunny's player. **The Bunny library only plays inside sites on its allowed list**: in Bunny, Stream → the library → Security → Allowed domains, add the address this app is hosted on (no `https://`, for example `play.example.org`). Until that is done the observer screen shows "The film is not loading on this screen".
+The films are on Bunny Stream and play in Bunny's player. **The Bunny library only plays inside sites on its allowed list**: in Bunny, Stream → the library → Security → Allowed domains, add the address this app is hosted on (no `https://`, for example `play.example.org`). Until that is done the observers' screen shows "The film is not loading on this screen".
 
 Use Chrome on the monitor's computer. Safari, iPhones and iPads may make the film wait for a tap on its play button each time.
 
 ## Content
 
-`content.json` holds the days, each day's run sheet (`run`), the Decide questions, the items that can be sent and the films (`films`: each one's Bunny id and length in seconds). A cue plays a film with `film` (one film), `films` (one per earlier decision) or `pick` (the game master chooses). `about` and each day's `background` are plain text shown to observers; the backgrounds are empty and waiting for words from the script. Save it and the server reloads. Its teams, roles and minutes are only the starting list: once the game master changes them on Setup, the live copy is in `state.json`.
+`content.json` holds the days, each day's run sheet (`run`), the Decide questions, the items that can be sent and the films (`films`: each one's Bunny id and length in seconds). A cue plays a film with `film`, or with `films` beside `versions` (one film per earlier decision). Save it and the server reloads. Its teams, roles and minutes are only the starting list: once the game master changes them on Setup, the live copy is in `state.json`.
 
-What's there now: the statements and Wednesday's four posts are word for word from the current script. The questions, the intelligence note, Friday's updates and the order of each run sheet come from the story-flow proposal and still need confirming. Which film goes with which cue is a best reading of the film names and needs confirming too: Friday's opening (Fully → Hunter access, On our terms → British oversight, No → Sovereign), and the three ending steps, where the game master picks the version.
+What's there now (21 Nov): names, facts and film numbers follow the reads as shot on 19 Nov. A cue names the film to play ("Film 05 · D2 B", "Ending 1D + 2A + 3B"). Posts and leaks are copied from `data/social.json`; items marked `"draft": true` are wording the script only describes and still need approving. The Decide questions are the 17 Nov ones with the names changed. Friday's two outcome steps (the next model release, evidence sharing) are recorded by the game master only and are not shown on tablets; they and the choice-to-ending map are a reading of the films and need confirming.
 
 ## Hosting it on a domain
 

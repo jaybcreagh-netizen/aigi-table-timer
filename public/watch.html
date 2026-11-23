@@ -5,10 +5,11 @@
 <title>Observer · AI Global Initiative: Exercise 001</title>
 <!-- AIGI observer screen. /watch. Made to sit on a monitor for the observers, beside the Zoom feed of the room, with nobody touching it:
      it plays each film in full quality when the game master taps that film's cue, then shows where the game is: the clock, what has
-     been decided, and what went to every table. On a wide screen nothing scrolls and the text is sized to be read across a room;
+     been decided, the background board's public figures, and what went to every table. On a wide screen nothing scrolls and the text is sized to be read across a room;
      the newest things are at the top and the oldest fall off the bottom. It also works on a person's own laptop or phone.
      The server sends the film and the time it started, so someone who joins late lands at the right point in it.
      The films are on Bunny Stream and play in Bunny's own player (an iframe), steered with player.js messages: ready, play, setCurrentTime, ended.
+     A cue can be several films back to back (the ending): the next one is loaded behind the one playing, so the join is short.
      A browser only lets a film start with sound after someone has tapped the page, hence the one tap at the start (and again if the page is reloaded). -->
 <style>
 @font-face { font-family: "Schibsted Grotesk"; font-weight: 400 900; src: url("fonts/schibsted-grotesk-latin-wght-normal.woff2") format("woff2"); }
@@ -49,6 +50,20 @@ main { position: relative; z-index: 1; flex: 1; min-height: 0; display: grid; gr
 .now { margin: calc(var(--u) * .22) 0 0 calc(var(--u) * .45); font-size: clamp(15px, calc(var(--u) * .13), 34px); font-weight: 600; color: var(--ice); min-height: 1.4em; }
 body.standby .phase, body.standby .bar b { opacity: 0; } body.paused .digits, body.paused .bar b { opacity: .45; }
 
+/* the background board, as on the tablets but only the rows that go to every table: figures under the clock, a slow ticker along the bottom */
+body.has-board .stage > * { --u: min(21cqw, calc(94cqh / var(--h, 4))); }   /* --h: the stage's height in clock units, set from the number of rows */
+.board { margin: calc(var(--u) * .3) 0 0 calc(var(--u) * .45); animation: fade .8s both; } .board[hidden], .ticker[hidden] { display: none; }
+@keyframes fade { from { opacity: 0; } }
+.figs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(var(--u) * .2) calc(var(--u) * .22); max-width: calc(var(--u) * 4.6); }
+.figs div { border-top: 1px solid var(--line); padding-top: calc(var(--u) * .08); }
+.figs b { display: block; font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -.02em; line-height: 1; font-size: calc(var(--u) * .25); white-space: nowrap; }
+.figs span { display: block; margin-top: calc(var(--u) * .04); font-weight: 600; font-size: max(11px, calc(var(--u) * .1)); line-height: 1.22; color: var(--soft); }
+.lines { margin-top: calc(var(--u) * .22); max-width: calc(var(--u) * 4.6); } .lines p { margin: 0 0 calc(var(--u) * .07); padding-left: calc(var(--u) * .1); border-left: 3px solid var(--blue); font-weight: 700; font-size: max(12px, calc(var(--u) * .12)); line-height: 1.28; }
+.ticker { position: relative; z-index: 1; flex: none; overflow: hidden; border-top: 1px solid var(--line); background: rgba(6,16,34,.55); font-weight: 700; font-size: clamp(12px, 1.9vmin, 26px); white-space: nowrap; animation: fade .8s both; }
+.ticker div { display: inline-flex; padding: .7em 0; animation: roll 60s linear infinite; } .ticker span { padding: 0 1.6em; color: var(--soft); } .ticker b { color: var(--fg); font-weight: 800; margin-left: .5em; }
+@keyframes roll { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .ticker div { animation: none; } }
+
 /* where the game is */
 .feed { min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 14px; padding: 2px 2px 0; font-size: clamp(16px, 2.1vmin, 34px);
   -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 70px), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 70px), transparent); }
@@ -57,6 +72,8 @@ body.standby .phase, body.standby .bar b { opacity: 0; } body.paused .digits, bo
 .eyebrow { font-weight: 800; font-size: .72em; letter-spacing: .14em; text-transform: uppercase; }
 .statement, .info { color: #fff; background: linear-gradient(180deg, rgba(20,41,75,.94), rgba(11,27,51,.97)); border-top: 3px solid var(--blue); box-shadow: 0 14px 36px rgba(2,8,20,.5), inset 0 1px 0 rgba(207,224,255,.22); }
 .statement .eyebrow, .info .eyebrow { color: var(--blue); } .statement .who { font-weight: 800; font-size: 1.2em; margin-top: 6px; }
+.statement .lockup { display: block; height: 2.2em; max-width: 100%; margin-top: 10px; object-fit: contain; object-position: left; }
+.post img.av { display: block; background: none; object-fit: cover; } .thread .src { display: flex; align-items: center; gap: 10px; } .thread .src img { width: 1.9em; height: 1.9em; border-radius: 4px; }
 .statement .rule { height: 2px; margin: 12px 0 13px; background: linear-gradient(90deg, #7298E9, #CFE0FF 40%, rgba(114,152,233,0)); }
 .statement .q { font-weight: 700; font-size: 1.12em; line-height: 1.3; } .statement .q div + div { margin-top: .55em; }
 .info p { margin: 8px 0 0; color: var(--ice); } .info .row { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); } .info .row:first-of-type { border: 0; padding-top: 0; margin-top: 8px; }
@@ -76,7 +93,7 @@ body.standby .phase, body.standby .bar b { opacity: 0; } body.paused .digits, bo
 
 /* the film: over everything, black */
 .film { position: fixed; inset: 0; z-index: 8; display: none; background: #000; }
-body.showing .film { display: block; } .film iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+body.showing .film { display: block; } .film iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; } .film iframe.pre { visibility: hidden; }
 .film .hide { position: absolute; z-index: 2; right: max(12px, env(safe-area-inset-right)); top: max(12px, env(safe-area-inset-top)); padding: 8px 14px; border-radius: 99px; background: rgba(6,16,34,.7); color: var(--ice); font-weight: 700; font-size: 13px; opacity: 0; transition: opacity .2s; }
 .film .hide:hover, .film .hide:focus-visible { opacity: 1; }
 .film .hint { position: absolute; z-index: 2; left: 50%; top: max(14px, env(safe-area-inset-top)); transform: translateX(-50%); max-width: calc(100% - 180px); padding: 9px 16px; border-radius: 99px; background: #F2B134; color: #15120A; font-weight: 800; font-size: 14px; text-align: center; pointer-events: none; }
@@ -92,7 +109,7 @@ body:not(.joined) .join { display: flex; }
 
 @media (orientation: portrait), (max-width: 760px) {
   html, body { height: auto; min-height: 100%; overflow: visible; }
-  main { grid-template-columns: 1fr; } .stage { container-type: inline-size; padding: 3vh 0 1vh; } .stage > * { --u: 20cqw; }
+  main { grid-template-columns: 1fr; } .stage { container-type: inline-size; padding: 3vh 0 1vh; } .stage > *, body.has-board .stage > * { --u: 20cqw; }
   .feed { overflow: visible; padding-bottom: 40px; font-size: 16px; -webkit-mask-image: none; mask-image: none; }
 }
 </style></head>
@@ -105,9 +122,11 @@ body:not(.joined) .join { display: flex; }
     <div class="clock"><div class="bar"><b id="bar"></b></div><div class="digits" id="digits"></div></div>
     <div class="rail" id="rail"></div>
     <div class="now" id="now"></div>
+    <div class="board" id="board" hidden></div>
   </section>
   <aside class="feed" id="feed"></aside>
 </main>
+<footer class="ticker" id="ticker" hidden></footer>
 <div class="film" id="film"><button class="hide" id="hide">Hide film</button><div class="hint" id="hint"></div></div>
 <div class="join" id="join">
   <h2>Observer</h2><h1 id="title">AI Global Initiative</h1>
@@ -117,22 +136,22 @@ body:not(.joined) .join { display: flex; }
 </div>
 <script>
 const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-let v = null, offset = 0, feedSig = '', joined = false;
+let v = null, offset = 0, feedSig = '', boardSig = '', joined = false;
 const serverNow = () => Date.now() + offset;
 
 const cardHTML = (it) => {
-  if (it.type === 'statement') return `<div class="card statement"><div class="eyebrow">${esc(it.label || 'Statement')}</div><div class="who">${esc(it.org)}</div><div class="rule"></div>
+  if (it.type === 'statement') return `<div class="card statement"><div class="eyebrow">${esc(it.label || 'Statement')}</div>${it.logo ? `<img class="lockup" src="orgs/${esc(it.logo)}/lockup-on-dark.png" alt="${esc(it.org)}">` : `<div class="who">${esc(it.org)}</div>`}<div class="rule"></div>
     <div class="q">${it.text.map((t, i) => `<div>${it.quote && i === 0 ? '“' : ''}${esc(t)}${it.quote && i === it.text.length - 1 ? '”' : ''}</div>`).join('')}</div></div>`;
-  if (it.type === 'post') return `<div class="card post"><div class="top"><div class="av">${esc((it.author || '?').replace(/^@/, '').split(/[ _]/).map((w) => w[0]).slice(0, 2).join('').toUpperCase())}</div>
+  if (it.type === 'post') return `<div class="card post"><div class="top">${it.logo ? `<img class="av" src="orgs/${esc(it.logo)}/avatar.png" alt="">` : `<div class="av">${esc((it.author || '?').replace(/^@/, '').split(/[ _]/).map((w) => w[0]).slice(0, 2).join('').toUpperCase())}</div>`}
     <div><div class="name">${esc(it.author)}</div><div class="meta">${esc([it.handle, it.time].filter(Boolean).join(' · '))}</div></div></div><div class="text">${esc(it.text)}</div>${it.stats ? `<div class="stats">${esc(it.stats)}</div>` : ''}</div>`;
-  if (it.type === 'thread') return `<div class="card thread"><div class="src">${esc(it.source || it.label)}</div><div class="msgs">${it.messages.map((m) => `<div class="m"><b>${esc(m.who)}<span>${esc(m.t)}</span></b><p>${esc(m.text)}</p></div>`).join('')}</div>${it.foot ? `<div class="foot">${esc(it.foot)}</div>` : ''}</div>`;
+  if (it.type === 'thread') return `<div class="card thread"><div class="src">${it.logo ? `<img src="orgs/${esc(it.logo)}/avatar.png" alt="">` : ''}${esc(it.source || it.label)}</div><div class="msgs">${it.messages.map((m) => `<div class="m"><b>${esc(m.who)}<span>${esc(m.t)}</span></b><p>${esc(m.text)}</p></div>`).join('')}</div>${it.foot ? `<div class="foot">${esc(it.foot)}</div>` : ''}</div>`;
   return `<div class="card note"><div class="eyebrow">${esc(it.label || 'Note')}</div><div class="text">${esc(it.text)}</div></div>`;
 };
 const opts = (q) => q.opts ? `<div class="opts">${q.opts.map((o) => `<span>${esc(o)}</span>`).join('')}</div>` : '';
 const askHTML = (qs) => !qs.length ? '' : `<div class="card ask"><div class="eyebrow">The room is deciding</div><h2>${esc(qs[0].q)}</h2>${opts(qs[0])}
   ${qs.slice(1).map((q) => `<div class="more"><h3>${esc(q.q)}</h3>${opts(q)}</div>`).join('')}</div>`;
 const decidedHTML = (ds) => !ds.length ? '' : `<div class="card info"><div class="eyebrow">Decided so far</div>${ds.map((d) => `<div class="row"><small>${esc(d.day)} · ${esc(d.q)}</small><b>${esc(d.choice)}</b></div>`).join('')}</div>`;
-const aboutHTML = () => `<div class="card info"><div class="eyebrow">About this exercise</div>${v.about ? `<p>${esc(v.about)}</p>` : ''}${v.day.background ? `<p><b>${esc(v.day.name)}.</b> ${esc(v.day.background)}</p>` : ''}
+const aboutHTML = () => `<div class="card info"><div class="eyebrow">About this exercise</div>${v.about ? `<p>${esc(v.about)}</p>` : ''}
   ${v.tables.length ? `<p>The tables: ${esc(v.tables.join(', '))}.</p>` : ''}</div>`;
 
 function render() {
@@ -143,6 +162,13 @@ function render() {
   const sig = JSON.stringify([v.questions, v.feed.map((f) => f.key), v.decided, v.day, v.about, v.tables]);
   if (sig !== feedSig) { feedSig = sig;
     $('feed').innerHTML = askHTML(v.questions) + decidedHTML(v.decided) + (v.feed.length ? `<h3>Sent to every table</h3>` + v.feed.map(cardHTML).join('') : '') + aboutHTML(); }
+  const bs = JSON.stringify([v.board, v.ticker]);
+  if (bs !== boardSig) { boardSig = bs; const B = v.board || [], T = v.ticker || [], figs = B.filter((r) => r.label), lines = B.filter((r) => r.text);
+    $('board').hidden = !B.length; document.body.classList.toggle('has-board', B.length > 0);
+    $('board').parentNode.style.setProperty('--h', 2.6 + Math.ceil(figs.length / 3) * .8 + (lines.length ? .25 + lines.length * .45 : 0));
+    $('board').innerHTML = (figs.length ? `<div class="figs">${figs.map((r) => `<div><b>${esc(r.value)}</b><span>${esc(r.label)}</span></div>`).join('')}</div>` : '') + (lines.length ? `<div class="lines">${lines.map((r) => `<p>${esc(r.text)}</p>`).join('')}</div>` : '');
+    const row = T.map((t) => `<span>${esc(t.name)}<b>${esc(t.value)}</b></span>`).join('');
+    $('ticker').hidden = !T.length; $('ticker').innerHTML = `<div>${row.repeat(8)}</div>`; }
   syncFilm(); tick();
 }
 function tick() {
@@ -156,37 +182,44 @@ function tick() {
   $('bar').style.height = (live && v.durationMs ? Math.max(0, Math.min(1, ms / v.durationMs)) * 100 : 100) + '%';
   $('now').textContent = Date.now() - endedAt < 20000 ? 'The film has ended.'
     : !live ? 'Between stages. The next film plays here when it starts in the room.' : ms <= 0 ? `Time is up on ${name}.` : v.running ? `The tables are in ${name}.` : `${name} is paused.`;
-  const f = v.film, playingNow = f && (serverNow() - f.at) / 1000 < f.seconds - 1;
+  const f = v.film, playingNow = f && (serverNow() - f.at) / 1000 < f.parts.reduce((n, p) => n + p.seconds, 0) - 1;
   if (!joined) $('joinmsg').textContent = playingNow ? 'A film is playing in the room now. Start to watch it from this point.' : 'This screen plays each film as it is shown in the room. Between films it shows where the game is.';
   syncFilm();
 }
 setInterval(tick, 250);
 
 // ---- the film ----
-// v.film is { src, at, seconds }: Bunny's player address, the server time the game master started it, and its length.
-let film = null, frame = null, st = null, done = 0, endedAt = 0, readyT = 0, hintT = 0;
-const pos = (f) => (serverNow() - f.at) / 1000;                       // where the film should be right now, in seconds
-const say = (method, value) => { try { frame.contentWindow.postMessage(JSON.stringify({ context: 'player.js', version: '0.0.11', method, value, listener: method === 'addEventListener' ? 'aigi-' + value : undefined }), new URL(film.src).origin); } catch {} };
+// v.film is { at, parts: [{ src, seconds }] }: the server time the game master started it, and one or more films to play back to back
+// (Bunny's player address and the length of each). cur is what this screen is showing: the film, which part, and the server time that part began.
+let cur = null, frame = null, pre = null, st = null, done = 0, endedAt = 0, readyT = 0, hintT = 0;
+const part = () => cur.f.parts[cur.k], pos = () => (serverNow() - cur.base) / 1000;      // where the part on screen should be right now, in seconds
+const link = (p, from, auto) => `${p.src}?autoplay=${auto}&muted=false&loop=false&preload=true&rememberPosition=false${from > 1 ? '&t=' + from : ''}`;
+const player = (src, cls) => { const el = document.createElement('iframe'); el.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture'; el.title = 'Film'; el.className = cls; el.src = src; $('film').prepend(el); return el; };
+const say = (method, value) => { try { frame.contentWindow.postMessage(JSON.stringify({ context: 'player.js', version: '0.0.11', method, value, listener: method === 'addEventListener' ? 'aigi-' + value : undefined }), new URL(part().src).origin); } catch {} };
 function syncFilm() {
   const f = v && v.film;
-  if (film && (!f || f.at !== film.at)) closeFilm();                  // stopped, or another film started
-  if (f && joined && !film && done !== f.at && pos(f) < f.seconds - 1) openFilm(f);
-  if (film) { const over = pos(film) - film.seconds, moving = st.playing && Date.now() - st.heard < 3000;
-    if ((over > 3 && !moving) || over > 90) endFilm(); }                // it never started, or it is long past its end
+  if (cur && (!f || f.at !== cur.f.at)) closeFilm();                    // stopped, or another film started
+  if (f && joined && !cur && done !== f.at) {                           // find the part that should be on now, and how far into it
+    let t = (serverNow() - f.at) / 1000, k = 0; while (k < f.parts.length && t >= f.parts[k].seconds - 1) t -= f.parts[k++].seconds;
+    if (k < f.parts.length) openPart(f, k, serverNow() - Math.max(0, t) * 1000);
+  }
+  if (cur) { const over = pos() - part().seconds, moving = st.playing && Date.now() - st.heard < 3000;
+    if ((over > 3 && !moving) || over > 90) nextPart(); }                 // it never started, or it is long past its end
 }
-function openFilm(f) {
-  film = f; st = { ready: false, played: false, playing: false, heard: 0, seeks: 0, sought: 0 };
-  const from = Math.floor(pos(f));
-  frame = document.createElement('iframe'); frame.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture'; frame.allowFullscreen = true; frame.title = 'Film';
-  frame.src = `${f.src}?autoplay=true&muted=false&loop=false&preload=true&rememberPosition=false${from > 1 ? '&t=' + from : ''}`;
-  $('film').prepend(frame); $('hint').textContent = ''; document.body.classList.add("showing");
-  readyT = setInterval(() => say('addEventListener', 'ready'), 400);   // ask until the player answers
-  hintT = setTimeout(() => { if (film === f && !st.played) $('hint').textContent = st.ready ? 'Tap the film to start it' : 'The film is not loading on this screen.'; }, 6000);
+function openPart(f, k, base) {
+  cur = { f, k, base }; st = { ready: false, played: false, playing: false, heard: 0, seeks: 0, sought: 0 };
+  if (pre) { frame = pre; pre = null; frame.className = ''; } else frame = player(link(f.parts[k], Math.floor(pos()), true), '');   // the part loaded behind the last one, or a new player
+  if (f.parts[k + 1]) pre = player(link(f.parts[k + 1], 0, false), 'pre');                                                        // load the next part behind this one
+  $('hint').textContent = ''; document.body.classList.add('showing');
+  readyT = setInterval(() => say('addEventListener', 'ready'), 400);     // ask until the player answers
+  const mine = cur; hintT = setTimeout(() => { if (cur === mine && !st.played) $('hint').textContent = st.ready ? 'Tap the film to start it' : 'The film is not loading on this screen.'; }, 6000);
 }
-function closeFilm() { clearInterval(readyT); clearTimeout(hintT); if (frame) frame.remove(); frame = film = st = null; document.body.classList.remove("showing"); }
-function endFilm() { done = film.at; endedAt = Date.now(); closeFilm(); }
-function catchUp() {                                                    // put the film where it should be: after a late start, a pause, or a stall
-  const want = pos(film); if (want >= film.seconds - 1 || st.seeks >= 4 || Date.now() - st.sought < 4000) return;
+function closePart() { clearInterval(readyT); clearTimeout(hintT); if (frame) frame.remove(); frame = null; }
+function closeFilm() { closePart(); if (pre) pre.remove(); pre = cur = st = null; document.body.classList.remove('showing'); }
+function nextPart() { const { f, k } = cur; if (!f.parts[k + 1]) return endFilm(); closePart(); openPart(f, k + 1, serverNow()); }
+function endFilm() { done = cur.f.at; endedAt = Date.now(); closeFilm(); }
+function catchUp() {                                                      // put the film where it should be: after a late start, a pause, or a stall
+  const want = pos(); if (want >= part().seconds - 1 || st.seeks >= 4 || Date.now() - st.sought < 4000) return;
   st.seeks++; st.sought = Date.now(); say('setCurrentTime', want + .3);
 }
 addEventListener('message', (e) => {
@@ -198,10 +231,10 @@ addEventListener('message', (e) => {
     say('play'); }
   else if (m.event === 'play') { st.playing = true; st.heard = Date.now(); if (!st.played) { st.played = true; $('hint').textContent = ''; } }
   else if (m.event === 'pause') st.playing = false;
-  else if (m.event === 'timeupdate') { st.heard = Date.now(); const at = m.value && m.value.seconds; if (st.playing && Number.isFinite(at) && Math.abs(pos(film) - at) > 2) catchUp(); }
-  else if (m.event === 'ended') endFilm();
+  else if (m.event === 'timeupdate') { st.heard = Date.now(); const at = m.value && m.value.seconds; if (st.playing && Number.isFinite(at) && Math.abs(pos() - at) > 2) catchUp(); }
+  else if (m.event === 'ended') nextPart();
 });
-$('hide').onclick = () => { done = film.at; closeFilm(); };
+$('hide').onclick = () => { done = cur.f.at; closeFilm(); };
 $('go').onclick = () => { joined = true; document.body.classList.add('joined'); wake(); syncFilm(); };
 
 let lock = null; const wake = async () => { try { if (!lock && navigator.wakeLock) { lock = await navigator.wakeLock.request('screen'); lock.onrelease = () => lock = null; } } catch {} };
