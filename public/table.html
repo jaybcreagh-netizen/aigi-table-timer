@@ -6,7 +6,7 @@
 <title>AI Global Initiative: Exercise 001</title>
 <!-- AIGI participant screen. /play, then /play?team=<id>&role=<id>. The look is the BN24 v0.6 "AIGI blue" package (brand/bn24-blue.css): navy, the #7298E9 light,
      the dot map, and the clock set like the wordmark: white minutes, lit-glass seconds, and the lockup's bar draining as the time runs.
-     No BN24 mark: this is the room's clock, not a broadcast. Time up flips the screen to the package's light palette. -->
+     No BN24 mark: this is the room's clock, not a broadcast. The screen is always dark: at time up the clock sits at 00:00 with the bar empty. -->
 <style>
 @font-face { font-family: "Schibsted Grotesk"; font-weight: 400 900; src: url("fonts/schibsted-grotesk-latin-wght-normal.woff2") format("woff2"); }
 @font-face { font-family: "ArchivoV"; font-weight: 100 900; font-stretch: 62% 125%; src: url("fonts/archivo-latin-wdth-normal.woff2") format("woff2"); }
@@ -17,8 +17,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--deep);
 body { display: flex; flex-direction: column; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
 
 /* ground: navy, the dot map, two hairline flares */
-.bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(120% 90% at 30% 40%, var(--navy-hi) 0%, var(--navy) 45%, var(--deep) 100%); transition: background .6s; overflow: hidden; }
-.bg img { position: absolute; left: 50%; top: 50%; width: max(150vw, 190vh); transform: translate(-46%, -47%); opacity: .2; transition: opacity .6s; }
+.bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(120% 90% at 30% 40%, var(--navy-hi) 0%, var(--navy) 45%, var(--deep) 100%); overflow: hidden; }
+.bg img { position: absolute; left: 50%; top: 50%; width: max(150vw, 190vh); transform: translate(-46%, -47%); opacity: .2; }
 .bg i { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--blue) 30%, var(--ice) 50%, var(--blue) 70%, transparent); opacity: .35; }
 .bg i.a { top: 21%; } .bg i.b { bottom: 17%; opacity: .2; }
 .bg i.a::after { content: ""; position: absolute; left: 12%; width: 34%; top: -3px; height: 7px; background: radial-gradient(closest-side, rgba(207,224,255,.55), transparent); }
@@ -54,27 +54,14 @@ body.paused .digits { opacity: .45; } body.paused .bar b { opacity: .45; }
 body.last .bar b { animation: pulse 1s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { body.last .bar b { animation: none; } }
 
-/* background board: the day's figures under the clock, this table's own lines, and a slow ticker along the bottom */
-body.has-board .stage > * { --u: min(22cqw, calc(94cqh / var(--h, 4))); }   /* --h: the stage's height in clock units, set from the number of rows */
-.board { margin: calc(var(--u) * .34) 0 0 calc(var(--u) * .45); animation: fade .8s both; } .board[hidden], .ticker[hidden] { display: none; }
+/* share prices: one quiet line along the bottom, small and dim, drifting slowly. The speed is set in render() from the line's length. */
+.ticker { position: relative; z-index: 1; flex: none; overflow: hidden; font-weight: 500; font-size: clamp(11px, 1.5vmin, 15px); white-space: nowrap; color: var(--soft); opacity: .6; animation: fade 2s both;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.ticker[hidden] { display: none; }
+.ticker div { display: inline-flex; padding: .9em 0 1em; animation: roll 300s linear infinite; } .ticker span { padding: 0 2.2em; } .ticker b { font-weight: 600; margin-left: .55em; }
 @keyframes fade { from { opacity: 0; } }
-.figs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(var(--u) * .2) calc(var(--u) * .22); max-width: calc(var(--u) * 4.6); }
-.figs div { border-top: 1px solid var(--line); padding-top: calc(var(--u) * .08); }
-.figs b { display: block; font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -.02em; line-height: 1; font-size: calc(var(--u) * .25); color: var(--fg); white-space: nowrap; }
-.figs span { display: block; margin-top: calc(var(--u) * .04); font-weight: 600; font-size: max(11px, calc(var(--u) * .1)); line-height: 1.22; color: var(--soft); }
-.lines { margin-top: calc(var(--u) * .22); max-width: calc(var(--u) * 4.6); } .lines p { margin: 0 0 calc(var(--u) * .07); padding-left: calc(var(--u) * .1); border-left: 3px solid var(--blue); font-weight: 700; font-size: max(12px, calc(var(--u) * .12)); line-height: 1.28; color: var(--fg); }
-.ticker { position: relative; z-index: 1; flex: none; overflow: hidden; border-top: 1px solid var(--line); background: rgba(6,16,34,.55); font-weight: 700; font-size: clamp(12px, 1.9vmin, 19px); white-space: nowrap; animation: fade .8s both; }
-.ticker div { display: inline-flex; padding: .7em 0; animation: roll 60s linear infinite; } .ticker span { padding: 0 1.6em; color: var(--soft); } .ticker b { color: var(--fg); font-weight: 800; margin-left: .5em; }
 @keyframes roll { to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .ticker div { animation: none; } }
-body.up .ticker { background: rgba(255,255,255,.6); }
-
-/* time up: the light palette */
-body.up { --fg: #0B1B33; --soft: rgba(11,27,51,.6); --line: rgba(79,120,214,.3); }
-body.up .bg { background: radial-gradient(120% 90% at 30% 40%, #fff 0%, #EEF3FC 50%, #DCE6F8 100%); } body.up .bg img { opacity: .5; }
-body.up header .day, body.up .phase { color: #23479E; }
-body.up .ss { background: linear-gradient(180deg, #7298E9 0%, #4F78D6 55%, #2E55B8 100%); -webkit-background-clip: text; background-clip: text; }
-body.up .rail div.on { border-color: var(--blue-lo); }
 
 /* briefing */
 .feed { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 2px 2px 40px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
@@ -97,13 +84,6 @@ body.up .rail div.on { border-color: var(--blue-lo); }
 .thread .foot { padding: 0 20px 14px; font-size: .76em; color: #6B7280; }
 .note { color: var(--navy); background: linear-gradient(180deg, var(--blue-hi), var(--blue) 55%, var(--blue-lo)); }
 .note .eyebrow { opacity: .8; } .note .text { font-weight: 800; font-size: 1.25em; line-height: 1.25; margin-top: 6px; white-space: pre-line; }
-.brief { cursor: default; color: #fff; background: linear-gradient(180deg, rgba(20,41,75,.94), rgba(11,27,51,.97)); border-left: 4px solid var(--blue); padding-bottom: 12px; }
-.brief .eyebrow { color: var(--blue); margin-bottom: 8px; } .brief .row { display: flex; align-items: baseline; gap: 12px; padding: 7px 0; border-top: 1px solid var(--line); }
-.brief .row b { flex: none; min-width: 5.2em; font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; font-size: 1.15em; letter-spacing: -.01em; white-space: nowrap; } .brief .row span { font-size: .9em; line-height: 1.25; color: var(--ice); }
-.ask { color: #0B1B33; background: linear-gradient(180deg, #FFFFFF 0%, #F2F5FB 55%, #E1E8F5 100%); border-left: 6px solid var(--blue-lo); cursor: default; }
-.ask .eyebrow { color: #23479E; } .ask h2 { font-size: 1.55em; line-height: 1.12; letter-spacing: -.01em; margin: 6px 0 0; font-weight: 800; }
-.ask .opts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; } .ask .opts span { border: 1.5px solid rgba(11,27,51,.35); padding: 4px 10px; font-weight: 700; font-size: .88em; }
-.ask .more { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(11,27,51,.14); } .ask .more h3 { margin: 0; font-size: 1.05em; font-weight: 800; }
 
 .ident { position: fixed; inset: 0; z-index: 7; display: none; place-items: center; text-align: center; padding: 6vmin; background: linear-gradient(180deg, #9DB8F2, var(--blue) 55%, var(--blue-lo)); color: var(--navy); font-family: "ArchivoV"; font-weight: 900; font-stretch: 108%; letter-spacing: -.03em; line-height: .95; font-size: clamp(40px, 13vmin, 150px); text-wrap: balance; }
 body.ident .ident { display: grid; }
@@ -122,7 +102,7 @@ body.ident .ident { display: grid; }
 
 @media (orientation: portrait), (max-width: 700px) {
   main, body.has-feed main { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
-  .stage { container-type: inline-size; padding: 2vh 0; } .stage > *, body.has-board .stage > * { --u: 22.5cqw; } body.has-board .stage > * { --u: 19cqw; } .rail div { font-size: calc(var(--u) * .085); letter-spacing: .06em; }
+  .stage { container-type: inline-size; padding: 2vh 0; } .stage > * { --u: 22.5cqw; } .rail div { font-size: calc(var(--u) * .085); letter-spacing: .06em; }
   body:not(.has-feed) main { grid-template-rows: 1fr; }
 }
 </style></head>
@@ -134,7 +114,6 @@ body.ident .ident { display: grid; }
     <div class="phase" id="phase"></div>
     <div class="clock"><div class="bar"><b id="bar"></b></div><div class="digits" id="digits"></div></div>
     <div class="rail" id="rail"></div>
-    <div class="board" id="board" hidden></div>
   </section>
   <aside class="feed" id="feed" hidden></aside>
 </main>
@@ -145,7 +124,7 @@ body.ident .ident { display: grid; }
 <script>
 const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const Q = new URLSearchParams(location.search), team = Q.get('team');
-let v = null, offset = 0, feedSig = '', boardSig = '', seen = new Set();
+let v = null, offset = 0, feedSig = '', tickerSig = '', seen = new Set();
 try { seen = new Set(JSON.parse(localStorage.getItem('aigi-seen') || '[]')); } catch {}
 const markSeen = (k) => { seen.add(k); try { localStorage.setItem('aigi-seen', JSON.stringify([...seen].slice(-300))); } catch {} };
 
@@ -158,28 +137,23 @@ const cardHTML = (it) => {
   if (it.type === 'thread') return `<div class="${cls}" ${k}><div class="src">${it.logo ? `<img src="orgs/${esc(it.logo)}/avatar.png" alt="">` : ''}${esc(it.source || it.label)}</div><div class="msgs">${it.messages.map((m) => `<div class="m"><b>${esc(m.who)}<span>${esc(m.t)}</span></b><p>${esc(m.text)}</p></div>`).join('')}</div>${it.foot ? `<div class="foot">${esc(it.foot)}</div>` : ''}</div>`;
   return `<div class="${cls}" ${k}><div class="eyebrow">${esc([it.label, it.only && it.only + ' only'].filter(Boolean).join(' · ') || 'Note')}</div><div class="text">${esc(it.text)}</div></div>`;
 };
-const askHTML = (qs) => !qs.length ? '' : `<div class="card ask"><div class="eyebrow">Decide</div><h2>${esc(qs[0].q)}</h2>${qs[0].opts ? `<div class="opts">${qs[0].opts.map((o) => `<span>${esc(o)}</span>`).join('')}</div>` : ''}
-  ${qs.slice(1).map((q) => `<div class="more"><h3>${esc(q.q)}</h3>${q.opts ? `<div class="opts">${q.opts.map((o) => `<span>${esc(o)}</span>`).join('')}</div>` : ''}</div>`).join('')}</div>`;
 
 function render() {
   $('team').textContent = v.team.name; $('role').textContent = v.role ? v.role.name : ''; $('day').textContent = v.day.name; document.title = `${v.role ? v.role.name : v.team.name} · ${v.title}`;
   const idx = v.phases.findIndex((p) => p.id === v.phase);
   $('phase').textContent = idx >= 0 ? v.phases[idx].name : '';
   $('rail').innerHTML = v.phases.map((p, i) => `<div class="${i < idx ? 'done' : i === idx ? 'on' : ''}">${esc(p.name)}</div>`).join('');
-  const brief = v.brief || [], sig = JSON.stringify([v.questions, v.feed.map((f) => f.key), v.day.id, brief]);
+  const sig = JSON.stringify([v.feed.map((f) => f.key), v.day.id]);
   if (sig !== feedSig) {
     const first = feedSig === ''; feedSig = sig;
-    $('feed').innerHTML = askHTML(v.questions) + (brief.length ? `<div class="card brief"><div class="eyebrow">${esc(v.team.name)} only</div>${brief.map((r) => `<div class="row"><b>${esc(r.value)}</b><span>${esc(r.label)}</span></div>`).join('')}</div>` : '') + v.feed.map(cardHTML).join('');
+    $('feed').innerHTML = v.feed.map(cardHTML).join('');
     if (first) $('feed').querySelectorAll('.card').forEach((c) => c.style.animation = 'none');
-    const has = v.questions.length + v.feed.length + brief.length > 0; $('feed').hidden = !has; document.body.classList.toggle('has-feed', has); $('feed').scrollTop = 0;
+    const has = v.feed.length > 0; $('feed').hidden = !has; document.body.classList.toggle('has-feed', has); $('feed').scrollTop = 0;
   }
-  const bs = JSON.stringify([v.board, v.ticker]);
-  if (bs !== boardSig) { boardSig = bs; const B = v.board || [], T = v.ticker || [], figs = B.filter((r) => r.label), lines = B.filter((r) => r.text);
-    $('board').hidden = !B.length; document.body.classList.toggle('has-board', B.length > 0);
-    $('board').parentNode.style.setProperty('--h', 2.1 + Math.ceil(figs.length / 3) * .8 + (lines.length ? .25 + lines.length * .45 : 0));
-    $('board').innerHTML = (figs.length ? `<div class="figs">${figs.map((r) => `<div><b>${esc(r.value)}</b><span>${esc(r.label)}</span></div>`).join('')}</div>` : '') + (lines.length ? `<div class="lines">${lines.map((r) => `<p>${esc(r.text)}</p>`).join('')}</div>` : '');
-    const row = T.map((t) => `<span>${esc(t.name)}<b>${esc(t.value)}</b></span>`).join('');
-    $('ticker').hidden = !T.length; $('ticker').innerHTML = `<div>${row.repeat(8)}</div>`; }
+  const T = v.ticker || [], ts = JSON.stringify(T);
+  if (ts !== tickerSig) { tickerSig = ts; const el = $('ticker');
+    el.hidden = !T.length; el.innerHTML = `<div>${T.map((t) => `<span>${esc(t.name)}<b>${esc(t.value)}</b></span>`).join('').repeat(8)}</div>`;
+    if (T.length) el.firstChild.style.animationDuration = Math.round(el.firstChild.scrollWidth / 2 / parseFloat(getComputedStyle(el).fontSize)) + 's'; }   // drifts about one letter-height a second, whatever the screen
   tick();
 }
 function tick() {
@@ -187,7 +161,7 @@ function tick() {
   const b = document.body.classList, live = !!v.phase;
   const ms = !live ? 0 : v.running ? v.endsAt - (Date.now() + offset) : v.remainingMs, s = Math.max(0, Math.ceil(ms / 1000));
   b.toggle('ident', (v.identifyUntil || 0) > Date.now() + offset); $('ident').textContent = v.role ? v.role.name : v.team.name;
-  b.toggle('standby', !live); b.toggle('paused', live && !v.running && ms > 0); b.toggle('up', live && ms <= 0); b.toggle('last', live && v.running && ms > 0 && ms <= 60000);
+  b.toggle('standby', !live); b.toggle('paused', live && !v.running && ms > 0); b.toggle('last', live && v.running && ms > 0 && ms <= 60000);
   const d = (n) => String(n).padStart(2, '0').split('').map((c) => `<span>${c}</span>`).join('');
   const html = live ? `<div class="mm">${d(Math.floor(s / 60))}<span class="c">:</span></div><div class="ss">${d(s % 60)}</div>` : `<div class="word">${esc(v.role ? v.role.name : v.team.name)}</div>`;
   if ($('digits').dataset.h !== html) { $('digits').dataset.h = html; $('digits').innerHTML = html; }
