@@ -19,7 +19,7 @@ For each tablet:
 
 Pack: stands, a charger or power bank per table, one spare tablet already set up, a mobile hotspot, the printed backup pack (one envelope of posts and notes per day, per table), this page, the paper run sheet.
 
-Game master → Setup → **Reset for the real run**.
+Game master → Run → **Reset** (beside Step back).
 
 ## In the room (about 20 minutes)
 
@@ -27,7 +27,7 @@ Game master → Setup → **Reset for the real run**.
 2. Observers' monitor: open `/watch` in Chrome, full screen, tap **Start with sound**. Game master → Run → Observers shows "1 watching".
 3. Game master → Run → Tables: every table has a lit dot. Tap **Identify**: each tablet shows its name large.
 4. Test: tap **Next** until a clock is running, check a tablet, tap **End**. Under Observers, play any film and check the monitor shows it with sound, then **Stop film**.
-5. Setup → **Reset for the real run**. Hands off the tablets.
+5. Run → **Reset** (beside Step back). Hands off the tablets.
 
 ## Running it
 

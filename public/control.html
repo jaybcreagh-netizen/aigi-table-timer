@@ -32,7 +32,7 @@ body[data-tab="run"] #setup, body[data-tab="setup"] #run, body.locked .tabs, bod
 #choose div { display: flex; flex-direction: column; gap: 8px; } #choose button { padding: 14px 16px; font-weight: 600; font-size: 17px; border: 1.5px solid rgba(11,27,51,.35); border-radius: 10px; } #choose button.on { background: var(--navy); border-color: var(--navy); color: #fff; }
 .keys { margin-top: 8px; } .keys button { padding: 13px 0; background: rgba(114,152,233,.12); font-weight: 500; border-radius: 10px; text-align: center; } .keys button:disabled { opacity: .35; }
 h2 { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); font-weight: 600; margin: 34px 2px 10px; display: flex; justify-content: space-between; align-items: baseline; }
-h2 button { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--blue); }
+h2 button { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--blue); } h2 span { display: flex; gap: 20px; } h2 .quiet { color: var(--soft); }
 .step { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 2px; border-bottom: 1px solid var(--line); }
 .step i { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; font-style: normal; font-size: 12px; font-weight: 600; color: var(--navy); }
 .step .what { flex: 1; min-width: 0; } .step b { display: block; font-weight: 600; font-size: 16px; } .step small { color: var(--soft); font-size: 13px; }
@@ -70,7 +70,7 @@ details { margin-top: 14px; } summary { cursor: pointer; font-weight: 600; color
   <div class="clock"><div class="t" id="t">00:00</div><div class="s" id="s"></div></div>
   <button id="next"></button><div id="choose" hidden></div>
   <div class="row keys"><button id="pause">Pause</button><button data-adj="-60000">−1 min</button><button data-adj="60000">+1 min</button><button id="end">End</button></div>
-  <h2>Run sheet <button id="back">Step back</button></h2><div id="steps"></div>
+  <h2>Run sheet <span><button class="quiet" data-reset="1">Reset</button><button id="back">Step back</button></span></h2><div id="steps"></div>
   <h2>Tables <button id="identify">Identify</button></h2><div class="tables" id="tables"></div>
   <h2>Observers <button id="stopfilm" hidden>Stop film</button></h2><div class="tables" id="obs"></div>
   <p class="hint">A film cue in the run sheet starts that film on the observers' screen. Tap it as the film starts in the room. <a href="watch" target="_blank">Observers' screen</a></p>
@@ -85,8 +85,8 @@ details { margin-top: 14px; } summary { cursor: pointer; font-weight: 600; color
   <h2>Tables</h2><div id="teams"></div>
   <input id="addteam" placeholder="Add a table" enterkeyhint="done">
   <p class="hint">Open a table's link on its tablet once and it stays on that table. Roles are optional: add one only if somebody needs private notes on a device of their own.</p>
-  <button class="big" id="reset">Reset for the real run</button>
-  <p class="hint">Back to the first day, clock cleared, everything sent recalled, run sheet unticked. Tables and minutes stay.</p>
+  <button class="big" id="reset" data-reset="1">Reset for the real run</button>
+  <p class="hint">Back to the first day, clock cleared, everything sent recalled, decisions cleared, run sheet unticked. Tables and minutes stay. The same button is on Run, beside Step back.</p>
   <button class="link" id="defaults">Put the tables back to the starting four</button>
 </div>
 <script>
@@ -211,7 +211,7 @@ document.addEventListener('click', (e) => {
   else if (b.id === 'end') { if (confirm('End this phase and clear the clock?')) cmd('end'); }
   else if (b.id === 'sendnote') { const text = $('note').value.trim(); if (text) cmd('note', { text, to: $('to').value }).then(() => $('note').value = ''); }
   else if (b.id === 'defaults') { if (confirm('Replace the tables with the starting four?')) cmd('setupDefaults'); }
-  else if (b.id === 'reset') { if (confirm('Reset for the real run? This clears the clock, recalls everything sent and goes back to the first day.')) cmd('reset'); }
+  else if (d.reset) { if (confirm('Reset for the real run? This clears the clock, the decisions and the run sheet ticks, recalls everything sent and goes back to the first day. Tables and minutes stay.')) { choosing = -1; cmd('reset'); } }
 });
 document.addEventListener('change', (e) => { const el = e.target, d = el.dataset, val = el.value.trim();
   if (d.min) cmd('minutes', { phase: d.min, minutes: +el.value });

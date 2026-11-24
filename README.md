@@ -19,7 +19,8 @@ It prints the links.
 
 - **Run** is the day as a list, in order, with one big **Next** button: start a phase, send an item, or tick off a main-screen cue. After Decide the button becomes the day's choices: tap what the room decided. That answer names the bulletin version on the next day's cue ("Option B", "Sovereign") and keeps only the follow-ups that fit. Tap the decision's line in the run sheet to change it. Tap any line in the run sheet to do it out of order (it asks first). Pause, −1 / +1 min and End act on the running clock. **Identify** makes every tablet show its table name for a few seconds. Anything not in the run sheet, and a box for typing a one-off note, sits under "More to send".
 - A **film cue** ("Play film 02 · Monday morning") also starts that film on the observers' screen, so tap it as the film starts in the room. If the film has versions, the app plays the one that fits the recorded decision; if that decision isn't recorded, the button becomes the versions and you tap the one that is starting. The ending plays its parts back to back (Ending 1D, then 2A, then 3B); a part whose outcome isn't recorded is left out. **Observers** shows how many screens are watching, what is playing, and **Stop film**. "Play any film for observers" starts one out of order.
-- **Setup** has the minutes, the tables (add, rename, remove, each with its own link) and **Reset for the real run**.
+- **Reset**, beside Step back on Run, puts the game back to the start: first day, clock cleared, everything sent recalled, decisions cleared, run sheet unticked, film stopped. Tables and minutes stay. It asks first.
+- **Setup** has the minutes, the tables (add, rename, remove, each with its own link) and the same reset as **Reset for the real run**.
 
 ## Participants
 
