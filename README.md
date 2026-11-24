@@ -40,13 +40,15 @@ A tablet stays on its table: hold the table's name for three seconds to change i
 - On a wide screen nothing scrolls and the text is sized to be read across a room: the newest things are at the top and the oldest fall off the bottom. On a person's own laptop or phone the same address works and scrolls.
 - Zoom also carries the room's sound, a little late, so observers can hear a film twice. Whoever looks after the observers' screens turns Zoom's sound down while a film plays, or the room microphone is muted for it.
 
-The films are on Bunny Stream and play in Bunny's player. **The Bunny library only plays inside sites on its allowed list**: in Bunny, Stream → the library → Security → Allowed domains, add the address this app is hosted on (no `https://`, for example `play.example.org`). Until that is done the observers' screen shows "The film is not loading on this screen".
+The films are streamed from Bunny Stream into the page's own player, so any number of screens in any number of rooms can watch. Quality follows each screen's connection, starting at the highest. **The Bunny library only serves sites on its allowed list**: in Bunny, Stream → the library → Security → Allowed domains, add the address this app is hosted on (no `https://`, for example `play.example.org`). Until that is done the observers' screen shows "The film is not loading on this screen" and keeps trying.
 
-Use Chrome on the monitor's computer. Safari, iPhones and iPads may make the film wait for a tap on its play button each time.
+Chrome is the browser this was tested in. If a browser refuses to start the sound, the screen shows **Tap to play the film**; one tap and it joins the film where it is. Expect that on Safari, iPhones and iPads.
+
+`public/vendor/hls.min.js` is hls.js 1.6.6 (Apache 2.0, licence beside it), the same library and version Bunny's own player uses to play these streams. It is a plain file: still nothing to install.
 
 ## Content
 
-`content.json` holds the days, each day's run sheet (`run`), the Decide questions, the items that can be sent and the films (`films`: each one's Bunny id and length in seconds). A cue plays a film with `film`, or with `films` beside `versions` (one film per earlier decision). Save it and the server reloads. Its teams, roles and minutes are only the starting list: once the game master changes them on Setup, the live copy is in `state.json`.
+`content.json` holds the days, each day's run sheet (`run`), the Decide questions, the items that can be sent and the films (`films`: each one's Bunny id and length in seconds, and `stream`, the Bunny library's host). A cue plays a film with `film`, or with `films` beside `versions` (one film per earlier decision). Save it and the server reloads. Its teams, roles and minutes are only the starting list: once the game master changes them on Setup, the live copy is in `state.json`.
 
 What's there now (21 Nov): names, facts and film numbers follow the reads as shot on 19 Nov. A cue names the film to play ("Film 05 · D2 B", "Ending 1D + 2A + 3B"). Posts and leaks are copied from `data/social.json`; items marked `"draft": true` are wording the script only describes and still need approving. The Decide questions are the 17 Nov ones with the names changed. Friday's two outcome steps (the next model release, evidence sharing) are recorded by the game master only and are not shown on tablets; they and the choice-to-ending map are a reading of the films and need confirming.
 

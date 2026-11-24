@@ -6,7 +6,7 @@ One page. Print it.
 
 - [ ] Run the whole thing once with every tablet, on the network you'll use in the room.
 - [ ] Check the run sheet order and every item's wording against the script (`content.json`). Check each film cue names the right film.
-- [ ] In Bunny, add this app's address to the library's allowed domains (Stream → library → Security). Then open the observer page (`/watch`) on the computer and monitor the observers will use, tap a film cue, and watch it play with sound.
+- [ ] In Bunny, add this app's address to the library's allowed domains (Stream → library → Security). Then open the observer page (`/watch`) on each computer and screen the observers will use, tap a film cue, and watch it play with sound.
 - [ ] Film a tablet under the lights. If the white time-up screen throws light on faces, ask for it to stay dark.
 
 ## The night before
@@ -25,9 +25,9 @@ Game master → Setup → **Reset for the real run**.
 ## In the room (about 20 minutes)
 
 1. Tablets on their stands, on power. Tap the home-screen icon. Each shows its table's name.
-2. Observers' monitor: open `/watch` in Chrome, full screen, tap **Start with sound**. Game master → Run → Observers shows "1 watching".
+2. Each observers' screen: open `/watch` in Chrome, full screen, tap **Start with sound**. Game master → Run → Observers shows how many are watching.
 3. Game master → Run → Tables: every table has a lit dot. Tap **Identify**: each tablet shows its name large.
-4. Test: tap **Next** until a clock is running, check a tablet, tap **End**. Under Observers, play any film and check the monitor shows it with sound, then **Stop film**.
+4. Test: tap **Next** until a clock is running, check a tablet, tap **End**. Under Observers, play any film and check every observers' screen shows it with sound, then **Stop film**.
 5. Setup → **Reset for the real run**. Hands off the tablets.
 
 ## Running it
@@ -53,6 +53,6 @@ One person drives. A second has the game master page open on another device and 
 | Amber dot on a tablet | It lost the connection and is still counting. Leave it; it reconnects by itself |
 | Venue internet gone | Join the tablets to the hotspot |
 | A tablet dies | Swap in the spare, open that table's link |
-| A film won't play on the observers' monitor | Reload the page and tap **Start with sound**; it joins the film where it is. Failing that, they watch it over Zoom |
+| A film won't play on an observers' screen | If it says **Tap to play the film**, tap it. Otherwise reload the page and tap **Start with sound**; it joins the film where it is. Failing that, they watch it over Zoom |
 | Game master phone dies | The second device takes over |
 | Nothing works | Phone timer, paper envelopes, carry on |

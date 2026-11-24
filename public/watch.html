@@ -8,8 +8,9 @@
      been decided, the background board's public figures, and what went to every table. On a wide screen nothing scrolls and the text is sized to be read across a room;
      the newest things are at the top and the oldest fall off the bottom. It also works on a person's own laptop or phone.
      The server sends the film and the time it started, so someone who joins late lands at the right point in it.
-     The films are on Bunny Stream and play in Bunny's own player (an iframe), steered with player.js messages: ready, play, setCurrentTime, ended.
-     A cue can be several films back to back (the ending): the next one is loaded behind the one playing, so the join is short.
+     The films are streamed from Bunny Stream (each film's HLS playlist) into this page's own video elements. hls.js (vendor/hls.min.js, the
+     version Bunny's own player uses) plays the stream where the browser can't by itself; Safari can. Quality follows the connection, starting high.
+     A cue can be several films back to back (the ending): the next one is loaded in a second, hidden video element, so the join is short.
      A browser only lets a film start with sound after someone has tapped the page, hence the one tap at the start (and again if the page is reloaded). -->
 <style>
 @font-face { font-family: "Schibsted Grotesk"; font-weight: 400 900; src: url("fonts/schibsted-grotesk-latin-wght-normal.woff2") format("woff2"); }
@@ -93,7 +94,9 @@ body.has-board .stage > * { --u: min(21cqw, calc(94cqh / var(--h, 4))); }   /* -
 
 /* the film: over everything, black */
 .film { position: fixed; inset: 0; z-index: 8; display: none; background: #000; }
-body.showing .film { display: block; } .film iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; } .film iframe.pre { visibility: hidden; }
+body.showing .film { display: block; } .film video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; } .film video.pre { visibility: hidden; }
+.film .tap { display: none; position: absolute; z-index: 3; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 20px 30px; font-weight: 800; font-size: 22px; color: var(--navy); background: linear-gradient(180deg, #9DB8F2, var(--blue) 55%, var(--blue-lo)); }
+body.needtap .film .tap { display: block; }
 .film .hide { position: absolute; z-index: 2; right: max(12px, env(safe-area-inset-right)); top: max(12px, env(safe-area-inset-top)); padding: 8px 14px; border-radius: 99px; background: rgba(6,16,34,.7); color: var(--ice); font-weight: 700; font-size: 13px; opacity: 0; transition: opacity .2s; }
 .film .hide:hover, .film .hide:focus-visible { opacity: 1; }
 .film .hint { position: absolute; z-index: 2; left: 50%; top: max(14px, env(safe-area-inset-top)); transform: translateX(-50%); max-width: calc(100% - 180px); padding: 9px 16px; border-radius: 99px; background: #F2B134; color: #15120A; font-weight: 800; font-size: 14px; text-align: center; pointer-events: none; }
@@ -127,13 +130,15 @@ body:not(.joined) .join { display: flex; }
   <aside class="feed" id="feed"></aside>
 </main>
 <footer class="ticker" id="ticker" hidden></footer>
-<div class="film" id="film"><button class="hide" id="hide">Hide film</button><div class="hint" id="hint"></div></div>
+<div class="film" id="film"><video id="va" playsinline preload="auto"></video><video id="vb" class="pre" playsinline preload="auto"></video>
+  <button class="hide" id="hide">Hide film</button><div class="hint" id="hint"></div><button class="tap" id="tap">Tap to play the film</button></div>
 <div class="join" id="join">
   <h2>Observer</h2><h1 id="title">AI Global Initiative</h1>
   <p id="joinmsg">This screen plays each film as it is shown in the room. Between films it shows where the game is.</p>
   <button id="go">Start with sound</button>
   <p class="small">One tap, so films can play with sound. After that the screen runs by itself.</p>
 </div>
+<script src="vendor/hls.min.js"></script>
 <script>
 const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let v = null, offset = 0, feedSig = '', boardSig = '', joined = false;
@@ -190,12 +195,24 @@ setInterval(tick, 250);
 
 // ---- the film ----
 // v.film is { at, parts: [{ src, seconds }] }: the server time the game master started it, and one or more films to play back to back
-// (Bunny's player address and the length of each). cur is what this screen is showing: the film, which part, and the server time that part began.
-let cur = null, frame = null, pre = null, st = null, done = 0, endedAt = 0, readyT = 0, hintT = 0;
+// (each one's stream address and length). cur is what this screen is showing: the film, which part, and the server time that part began.
+// Two video elements: vids[on] is on screen, the other holds the next part of a several-part film ready.
+const vids = [$('va'), $('vb')]; let on = 0, cur = null, st = null, done = 0, endedAt = 0, hintT = 0;
+const vid = () => vids[on], spare = () => vids[1 - on];
 const part = () => cur.f.parts[cur.k], pos = () => (serverNow() - cur.base) / 1000;      // where the part on screen should be right now, in seconds
-const link = (p, from, auto) => `${p.src}?autoplay=${auto}&muted=false&loop=false&preload=true&rememberPosition=false${from > 1 ? '&t=' + from : ''}`;
-const player = (src, cls) => { const el = document.createElement('iframe'); el.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture'; el.title = 'Film'; el.className = cls; el.src = src; $('film').prepend(el); return el; };
-const say = (method, value) => { try { frame.contentWindow.postMessage(JSON.stringify({ context: 'player.js', version: '0.0.11', method, value, listener: method === 'addEventListener' ? 'aigi-' + value : undefined }), new URL(part().src).origin); } catch {} };
+function unload(el) { clearTimeout(el.again); el.pause(); if (el.hls) { el.hls.destroy(); el.hls = null; } if (el.dataset.src) { delete el.dataset.src; el.removeAttribute('src'); el.load(); } }
+function load(el, src, from) {                                           // point a video element at a stream, 'from' seconds in
+  unload(el); el.dataset.src = src;
+  if (window.Hls && Hls.isSupported()) {
+    const h = el.hls = new Hls({ startPosition: from > 1 ? from : -1, abrEwmaDefaultEstimate: 8e6 });   // assume a good connection: start at full quality and step down if it isn't
+    h.on(Hls.Events.ERROR, (e, d) => { if (!d.fatal || el.hls !== h) return;
+      if (d.type === Hls.ErrorTypes.MEDIA_ERROR) return h.recoverMediaError();
+      if (el === vid() && cur && !st.played) $('hint').textContent = 'The film is not loading on this screen.';
+      el.again = setTimeout(() => { if (el.hls === h) load(el, src, el === vid() && cur ? pos() : 0); }, 3000); });   // refused or no connection: keep trying while the film is on
+    h.loadSource(src); h.attachMedia(el);
+  } else { el.src = src; if (from > 1) el.addEventListener('loadedmetadata', () => { el.currentTime = from; }, { once: true }); el.load(); }   // Safari plays the stream by itself
+}
+function play() { const el = vid(); el.muted = false; const p = el.play(); if (p) p.catch((e) => { if (cur && el === vid() && e.name === 'NotAllowedError') document.body.classList.add('needtap'); }); }
 function syncFilm() {
   const f = v && v.film;
   if (cur && (!f || f.at !== cur.f.at)) closeFilm();                    // stopped, or another film started
@@ -203,37 +220,31 @@ function syncFilm() {
     let t = (serverNow() - f.at) / 1000, k = 0; while (k < f.parts.length && t >= f.parts[k].seconds - 1) t -= f.parts[k++].seconds;
     if (k < f.parts.length) openPart(f, k, serverNow() - Math.max(0, t) * 1000);
   }
-  if (cur) { const over = pos() - part().seconds, moving = st.playing && Date.now() - st.heard < 3000;
+  if (cur) { const over = pos() - part().seconds, moving = !vid().paused && Date.now() - st.heard < 3000;
     if ((over > 3 && !moving) || over > 90) nextPart(); }                 // it never started, or it is long past its end
 }
 function openPart(f, k, base) {
-  cur = { f, k, base }; st = { ready: false, played: false, playing: false, heard: 0, seeks: 0, sought: 0 };
-  if (pre) { frame = pre; pre = null; frame.className = ''; } else frame = player(link(f.parts[k], Math.floor(pos()), true), '');   // the part loaded behind the last one, or a new player
-  if (f.parts[k + 1]) pre = player(link(f.parts[k + 1], 0, false), 'pre');                                                        // load the next part behind this one
-  $('hint').textContent = ''; document.body.classList.add('showing');
-  readyT = setInterval(() => say('addEventListener', 'ready'), 400);     // ask until the player answers
-  const mine = cur; hintT = setTimeout(() => { if (cur === mine && !st.played) $('hint').textContent = st.ready ? 'Tap the film to start it' : 'The film is not loading on this screen.'; }, 6000);
+  cur = { f, k, base }; st = { played: false, heard: 0, seeks: 0, sought: 0 };
+  const src = f.parts[k].src, next = f.parts[k + 1];
+  if (spare().dataset.src === src) { const old = vid(); on = 1 - on; unload(old); old.classList.add('pre'); vid().classList.remove('pre'); }   // this part is ready in the other element: swap
+  else { unload(spare()); load(vid(), src, pos()); }
+  if (next) load(spare(), next.src, 0);                                  // get the next part ready behind this one
+  $('hint').textContent = ''; document.body.classList.remove('needtap'); document.body.classList.add('showing'); play();
+  const mine = cur; clearTimeout(hintT); hintT = setTimeout(() => { if (cur === mine && !st.played && !document.body.classList.contains('needtap')) $('hint').textContent = 'The film is not loading on this screen.'; }, 8000);
 }
-function closePart() { clearInterval(readyT); clearTimeout(hintT); if (frame) frame.remove(); frame = null; }
-function closeFilm() { closePart(); if (pre) pre.remove(); pre = cur = st = null; document.body.classList.remove('showing'); }
-function nextPart() { const { f, k } = cur; if (!f.parts[k + 1]) return endFilm(); closePart(); openPart(f, k + 1, serverNow()); }
+function closeFilm() { clearTimeout(hintT); vids.forEach(unload); cur = st = null; document.body.classList.remove('showing', 'needtap'); }
+function nextPart() { const { f, k } = cur; if (f.parts[k + 1]) openPart(f, k + 1, serverNow()); else endFilm(); }
 function endFilm() { done = cur.f.at; endedAt = Date.now(); closeFilm(); }
 function catchUp() {                                                      // put the film where it should be: after a late start, a pause, or a stall
   const want = pos(); if (want >= part().seconds - 1 || st.seeks >= 4 || Date.now() - st.sought < 4000) return;
-  st.seeks++; st.sought = Date.now(); say('setCurrentTime', want + .3);
+  st.seeks++; st.sought = Date.now(); vid().currentTime = want + .3;
 }
-addEventListener('message', (e) => {
-  if (!frame || e.source !== frame.contentWindow) return;
-  let m = e.data; if (typeof m === 'string') { try { m = JSON.parse(m); } catch { return; } }
-  if (!m || m.context !== 'player.js') return;
-  if (m.event === 'ready' && !st.ready) { st.ready = true; clearInterval(readyT);
-    for (const ev of ['play', 'pause', 'ended', 'timeupdate', 'error']) say('addEventListener', ev);
-    say('play'); }
-  else if (m.event === 'play') { st.playing = true; st.heard = Date.now(); if (!st.played) { st.played = true; $('hint').textContent = ''; } }
-  else if (m.event === 'pause') st.playing = false;
-  else if (m.event === 'timeupdate') { st.heard = Date.now(); const at = m.value && m.value.seconds; if (st.playing && Number.isFinite(at) && Math.abs(pos() - at) > 2) catchUp(); }
-  else if (m.event === 'ended') nextPart();
-});
+for (const el of vids) {
+  el.addEventListener('playing', () => { if (cur && el === vid()) { st.played = true; $('hint').textContent = ''; document.body.classList.remove('needtap'); } });
+  el.addEventListener('timeupdate', () => { if (!cur || el !== vid()) return; st.heard = Date.now(); if (!el.paused && Math.abs(pos() - el.currentTime) > 2) catchUp(); });
+  el.addEventListener('ended', () => { if (cur && el === vid()) nextPart(); });
+}
+$('tap').onclick = () => { document.body.classList.remove('needtap'); play(); };
 $('hide').onclick = () => { done = cur.f.at; closeFilm(); };
 $('go').onclick = () => { joined = true; document.body.classList.add('joined'); wake(); syncFilm(); };
 

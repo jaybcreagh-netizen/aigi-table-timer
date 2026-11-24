@@ -77,7 +77,7 @@ function watchView() {
   const ticker = stage ? (d.ticker || []).filter((t) => fits(t.when)).map((t) => ({ name: t.name, value: t.value })) : [];
   return { now: Date.now(), title: content.title, about: content.about || '', day: { id: d.id, name: d.name },
     tables: S().teams.map((t) => t.name), phases: phases(), ...timer(), questions: state.phase === 'decide' ? asked(d) : [], decided, feed, board, ticker,
-    film: ids.length ? { at: state.film.at, parts: ids.map((id) => ({ src: content.films.embed + filmList()[id].video, seconds: filmList()[id].seconds })) } : null };
+    film: ids.length ? { at: state.film.at, parts: ids.map((id) => ({ src: content.films.stream + filmList()[id].video + '/playlist.m3u8', seconds: filmList()[id].seconds })) } : null };
 }
 function controlView() {
   const counts = {}; let watching = 0; for (const c of clients) if (c.watch) watching++; else if (!c.control) { counts[c.team] = (counts[c.team] || 0) + 1; if (c.role) counts[c.role] = (counts[c.role] || 0) + 1; }
@@ -144,7 +144,7 @@ function keyOK(req, u) {
 }
 const codeOK = (u) => !S().joinCode || (u.searchParams.get('code') || '').trim().toLowerCase() === S().joinCode.toLowerCase();
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.png': 'image/png', '.woff2': 'font/woff2', '.json': 'application/json', '.svg': 'image/svg+xml' };
+const TYPES = { '.txt': 'text/plain; charset=utf-8', '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.png': 'image/png', '.woff2': 'font/woff2', '.json': 'application/json', '.svg': 'image/svg+xml' };
 const json = (res, code, obj) => { res.writeHead(code, { 'Content-Type': TYPES['.json'], 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); };
 const deny = (res, ok) => { res.writeHead(ok === null ? 429 : 403); res.end(); };
 const server = http.createServer((req, res) => {
@@ -174,7 +174,7 @@ const server = http.createServer((req, res) => {
   fs.readFile(file, (err, buf) => {
     if (err) { res.writeHead(404); return res.end('Not found'); }
     const ext = path.extname(file);
-    res.writeHead(200, { 'Content-Type': TYPES[ext] || 'application/octet-stream', 'Cache-Control': ext === '.woff2' || ext === '.png' ? 'max-age=86400' : 'no-cache', 'X-Robots-Tag': 'noindex' });
+    res.writeHead(200, { 'Content-Type': TYPES[ext] || 'application/octet-stream', 'Cache-Control': ext === '.woff2' || ext === '.png' || page.startsWith('/vendor/') ? 'max-age=86400' : 'no-cache', 'X-Robots-Tag': 'noindex' });
     res.end(buf);
   });
 });
