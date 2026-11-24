@@ -8,25 +8,25 @@ Every number here is invented. Each is built to sit inside what Geeta reads, and
 
 The price of time. These were the two shared lines under the clock.
 
-| Figure | Monday | Wednesday | Friday | Leans on |
+| Figure | Monday | Wednesday | Thursday | Leans on |
 |---|---|---|---|---|
 | Cost to the economy, each day systems stay down | £350m | £350m | £350m | "more than £1bn" by Wednesday, four days in |
-| Procedures postponed, each day | about 200 | about 250 | about 350 | 200+ Monday, 400+ Monday afternoon, 500 to 900 Wednesday, 1,600+ Friday |
+| Procedures postponed, each day | about 200 | about 250 | about 350 | 200+ Monday, 400+ Monday afternoon, 500 to 900 Wednesday, 1,600+ Thursday |
 | Blood samples retested by hand, each day | 1,000 | 1,000 | 1,000 | a quarter of 4,000 done by Monday; 2,000 left on Wednesday |
 | Days of O-negative blood left in the north | 4 | 2 | 2 | the urgent appeal on Monday afternoon |
 
 ## Government only
 
-| Figure | Monday | Wednesday | Friday | Why it matters |
+| Figure | Monday | Wednesday | Thursday | Why it matters |
 |---|---|---|---|---|
 | Emergency fund ministers can spend without a vote | £250m | £250m | £250m, less whatever they pledged | money to offer British Compute or the NHS |
 | Public who say ministers are acting too slowly | 41% | 58% | 66% on a British-led path, 49% with Hunter in | pressure to act |
-| Ambulance handover delays, average in the north | 38 min | 54 min | 71 min | A&E diversions on Friday |
+| Ambulance handover delays, average in the north | 38 min | 54 min | 71 min | A&E diversions on Thursday |
 | Hospitals asking for military help with logistics | 0 | 3 | 7 | a card to play or hold |
 
 ## Frontier Labs only
 
-| Figure | Monday | Wednesday | Friday | Why it matters |
+| Figure | Monday | Wednesday | Thursday | Why it matters |
 |---|---|---|---|---|
 | UK contracts, a year | £1.1bn | £1.1bn | £1.1bn | what it stands to lose |
 | Its own estimate that Hunter is clean | not shown | 80% | 80% | a doubt it can share or hide (see the leak about a related version) |
@@ -36,7 +36,7 @@ The price of time. These were the two shared lines under the clock.
 
 ## Infrastructure and services only
 
-| Figure | Monday | Wednesday | Friday | Why it matters |
+| Figure | Monday | Wednesday | Thursday | Why it matters |
 |---|---|---|---|---|
 | Penalties British Compute owes customers, a day | £14m | £14m | £14m | why it wants speed |
 | Insurance cover left | £200m | £158m | £130m | when it runs out of cover |
@@ -46,18 +46,18 @@ The price of time. These were the two shared lines under the clock.
 
 ## International only
 
-| Figure | Monday | Wednesday | Friday | Why it matters |
+| Figure | Monday | Wednesday | Thursday | Why it matters |
 |---|---|---|---|---|
-| European data centres running the same setup | not shown | 27 | 27 | how far it could go; Ireland on Friday |
+| European data centres running the same setup | not shown | 27 | 27 | how far it could go; Ireland on Thursday |
 | Incident staff allies have offered | 0 | 15 | 40 | help, if Britain asks |
-| What Washington wants before it shares intelligence | not shown | not shown | full access to British evidence | the White House line on Friday afternoon |
+| What Washington wants before it shares intelligence | not shown | not shown | full access to British evidence | the White House line on Thursday afternoon |
 | Countries asking Britain for a briefing | 2 | 9 | 14 | pressure to say something publicly |
 
 ## The ones to look at hardest
 
 - **Frontier Labs' 80%.** The most useful card and the most likely to steer the room. Lower it and Hunter looks reckless; raise it and the argument is over.
 - **Days to rebuild from backups.** It gives the British-led options a finish date. The films never say Sovereign finishes, only that recovery is slow, so nine days must not read as a promise.
-- **Public opinion on Friday.** It is the only figure here that rewards one Wednesday choice over another.
+- **Public opinion on Thursday.** It is the only figure here that rewards one Wednesday choice over another.
 - **Military help.** A new lever the scripts don't have. Drop it if it opens a door the facilitators don't want.
 
 ## Rules these follow

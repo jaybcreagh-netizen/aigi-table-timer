@@ -35,7 +35,7 @@ A tablet stays on its table: hold the table's name for three seconds to change i
 
 - Open it in Chrome, full screen, and tap **Start with sound** once. A browser will not start a film with sound until someone has tapped the page. If the page is ever reloaded it needs that tap again.
 - When the game master taps a film cue, the film plays full screen. The server sends the film and the time it started, so a screen that is opened late or reloaded lands at the right point.
-- Between films it shows the day, the stage and its clock, the same quiet line of share prices as the tablets, what has been decided so far, the Decide questions (during Decide only), and whatever went to every table. Anything addressed to one table or role and Friday's two game-master-only outcomes are never sent to this screen.
+- Between films it shows the day, the stage and its clock, the same quiet line of share prices as the tablets, what has been decided so far, the Decide questions (during Decide only), and whatever went to every table. Anything addressed to one table or role and Thursday's two game-master-only outcomes are never sent to this screen.
 - The screen is only ever sent the films that are playing, never the versions the room didn't pick.
 - On a wide screen nothing scrolls and the text is sized to be read across a room: the newest things are at the top and the oldest fall off the bottom. On a person's own laptop or phone the same address works and scrolls.
 - Zoom also carries the room's sound, a little late, so observers can hear a film twice. Whoever looks after the observers' screens turns Zoom's sound down while a film plays, or the room microphone is muted for it.
@@ -48,7 +48,7 @@ Use Chrome on the monitor's computer. Safari, iPhones and iPads may make the fil
 
 `content.json` holds the days, each day's run sheet (`run`), the Decide questions, the items that can be sent and the films (`films`: each one's Bunny id and length in seconds). A cue plays a film with `film`, or with `films` beside `versions` (one film per earlier decision). Save it and the server reloads. Its teams, roles and minutes are only the starting list: once the game master changes them on Setup, the live copy is in `state.json`.
 
-What's there now (21 Nov): names, facts and film numbers follow the reads as shot on 19 Nov. A cue names the film to play ("Film 05 · D2 B", "Ending 1D + 2A + 3B"). Posts and leaks are copied from `data/social.json`; items marked `"draft": true` are wording the script only describes and still need approving. The Decide questions are the 17 Nov ones with the names changed. Friday's two outcome steps (the next model release, evidence sharing) are recorded by the game master only and are not shown on tablets; they and the choice-to-ending map are a reading of the films and need confirming.
+What's there now (21 Nov): names, facts and film numbers follow the reads as shot on 19 Nov. A cue names the film to play ("Film 05 · D2 B", "Ending 1D + 2A + 3B"). Posts and leaks are copied from `data/social.json`; items marked `"draft": true` are wording the script only describes and still need approving. The Decide questions are the 17 Nov ones with the names changed. Thursday's two outcome steps (the next model release, evidence sharing) are recorded by the game master only and are not shown on tablets; they and the choice-to-ending map are a reading of the films and need confirming.
 
 ## Hosting it on a domain
 

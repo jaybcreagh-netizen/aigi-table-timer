@@ -1,5 +1,5 @@
 {
- "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. 'run' is each day's run sheet in order: a step starts a phase, sends an item, records a decision, or is a cue the game master just ticks off. {'decision': true} records the day's first question. {'decision': 'key', 'q', 'opts'} is an outcome only the game master sees, kept under that key. 'by' + 'versions' on a cue name the film to play for an earlier decision; 'also' adds more parts to the name; FILMS: 'films' at the top lists every film ('video' is its Bunny Stream id, 'seconds' its length). A cue with 'film' (one film) or 'films' beside 'versions' (one film per earlier decision; 'also' parts play after it, in order) starts those films on the observers' screen (/watch) when the game master taps the cue. 'about' is a line of plain text shown to observers between films; 'when' shows a step or a question only for that decision. Items not in 'run' sit under More. Teams and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES (2026-11-21): names, facts and film numbers follow the reads as shot on 19 Nov (vault sources/2026-11-19-geeta-shoot-as-read.md) and the review export 'v3 review 2026-11-20'. Posts and leaks are copied from data/social.json; those marked 'draft': true are wording the script only describes, awaiting Jay's approval. The Decide questions are carried over from the 17 Nov version with the names changed. The two outcome steps on Friday and the choice-to-ending map are a reading of the films: confirm before the day. SHARE PRICES: a {'ticker': true} step in 'run' turns on the day's 'ticker', the made-up share prices in one quiet line along the bottom of every screen; 'when' shows a price only for that decision. Rows marked 'invented': true are not in the scripts or films; the rest appear in the film graphics. 'logo' on an item names a folder in public/orgs (copied from brand/orgs): posts use its avatar, statements its lockup, leaks its avatar in the header. The figures under the clock (each day's 'board' rows) and each table's private figures card ('brief') were taken off the screens on 2026-11-23: the tables get those numbers in their intel briefing. The numbers are in table/FIGURES-DRAFT.md and the old rows are in the git history.",
+ "_about": "Days, Decide questions and the items the game master can send. Edit and save: the server reloads it. 'run' is each day's run sheet in order: a step starts a phase, sends an item, records a decision, or is a cue the game master just ticks off. {'decision': true} records the day's first question. {'decision': 'key', 'q', 'opts'} is an outcome only the game master sees, kept under that key. 'by' + 'versions' on a cue name the film to play for an earlier decision; 'also' adds more parts to the name; FILMS: 'films' at the top lists every film ('video' is its Bunny Stream id, 'seconds' its length). A cue with 'film' (one film) or 'films' beside 'versions' (one film per earlier decision; 'also' parts play after it, in order) starts those films on the observers' screen (/watch) when the game master taps the cue. 'about' is a line of plain text shown to observers between films; 'when' shows a step or a question only for that decision. Items not in 'run' sit under More. Teams and minutes here are only the starting point; the game master changes them live on the Setup tab (kept in state.json). Item types: statement | post | thread | note. 'to' is a team id or a role id; leave it out for everyone. SOURCES (2026-11-21): names, facts and film numbers follow the reads as shot on 19 Nov (vault sources/2026-11-19-geeta-shoot-as-read.md) and the review export 'v3 review 2026-11-20'. Posts and leaks are copied from data/social.json; those marked 'draft': true are wording the script only describes, awaiting Jay's approval. The Decide questions are carried over from the 17 Nov version with the names changed. The two outcome steps on Thursday and the choice-to-ending map are a reading of the films: confirm before the day. SHARE PRICES: a {'ticker': true} step in 'run' turns on the day's 'ticker', the made-up share prices in one quiet line along the bottom of every screen; 'when' shows a price only for that decision. Rows marked 'invented': true are not in the scripts or films; the rest appear in the film graphics. 'logo' on an item names a folder in public/orgs (copied from brand/orgs): posts use its avatar, statements its lockup, leaks its avatar in the header. The figures under the clock (each day's 'board' rows) and each table's private figures card ('brief') were taken off the screens on 2026-11-23: the tables get those numbers in their intel briefing. The numbers are in table/FIGURES-DRAFT.md and the old rows are in the git history.",
  "title": "AI Global Initiative: Exercise 001",
  "phases": [
   {
@@ -36,7 +36,7 @@
    "name": "International"
   }
  ],
- "about": "A tabletop exercise played in one room over three days of the story: Monday, Wednesday and Friday. Each day the tables prepare, discuss, then decide. This screen plays each film as it is shown in the room, then shows where the game is.",
+ "about": "A tabletop exercise played in one room over three days of the story: Monday, Wednesday and Thursday. Each day the tables prepare, discuss, then decide. This screen plays each film as it is shown in the room, then shows where the game is.",
  "films": {
   "embed": "https://iframe.mediadelivery.net/embed/816973/",
   "list": {
@@ -91,7 +91,7 @@
     "seconds": 51
    },
    "f11": {
-    "name": "Film 11 · D3 Friday afternoon, breaking",
+    "name": "Film 11 · D3 Thursday afternoon, breaking",
     "video": "9e4752a5-9d9e-4ae7-b37e-2c7829eb3f92",
     "seconds": 52
    },
@@ -446,10 +446,10 @@
   },
   {
    "id": "d3",
-   "name": "Friday",
+   "name": "Thursday",
    "run": [
     {
-     "cue": "Play the Friday morning film",
+     "cue": "Play the Thursday morning film",
      "by": "d2",
      "versions": {
       "Frontier Labs’ Hunter": "Film 08 · D3 Hunter access",
@@ -488,7 +488,7 @@
      "phase": "discuss"
     },
     {
-     "cue": "Play film 11 · Friday afternoon, breaking",
+     "cue": "Play film 11 · Thursday afternoon, breaking",
      "film": "f11"
     },
     {
