@@ -2,13 +2,15 @@
 // AIGI table timer. One small server, no dependencies.
 //   node table/server.js          prints the links
 //   /        portal            /play   participants (pick a table, then a role)            /gm   game master            /watch   observers
-// Env: PORT (2424), AIGI_KEY (game master key; with none set, /gm is open), AIGI_STATE (where state.json lives, e.g. a mounted volume).
+// Env: PORT (2424), AIGI_STATE (where state.json lives, e.g. a mounted volume).
+// There is no game master key: /gm is open to anyone who can reach this address. It is made to run on a laptop in the room.
+// Don't put it on a public address as it is.
 // The clock is a phase and an end time, so every device counts down by itself and keeps time if the connection drops.
 // Each device is sent only the items addressed to everyone, its table or its role.
 // A film is an id and a start time, the same idea as the clock: an observer who joins late lands at the right point in it.
 // Tables, roles, minutes and the participant code are edited by the game master and kept in state.json; content.json seeds them
 // and holds the days, questions and items.
-const http = require('http'), fs = require('fs'), path = require('path'), os = require('os'), crypto = require('crypto');
+const http = require('http'), fs = require('fs'), path = require('path'), os = require('os');
 
 const DIR = __dirname, PUB = path.join(DIR, 'public'), STATE_FILE = process.env.AIGI_STATE || path.join(DIR, 'state.json');
 const PORT = +process.env.PORT || 2424;
@@ -21,8 +23,7 @@ const seedSetup = () => ({ teams: content.teams.map((t) => ({ id: t.id, name: t.
 const fresh = () => ({ day: content.days[0].id, phase: null, running: false, endsAt: 0, remainingMs: 0, durationMs: 0, sent: [], step: {}, decisions: {}, ticker: {}, film: null, identifyUntil: 0, setup: seedSetup() });
 let state = fresh();
 try { const s = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); state = Object.assign(fresh(), s); if (!s.setup) state.setup = seedSetup(); } catch {}
-const KEY = process.env.AIGI_KEY || '';   // no key unless one is set: fine in the room, set one before hosting it on a public address
-delete state.key;
+delete state.key;   // left in an old state.json from when there was a game master key
 let saveT = null;
 const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { fs.writeFileSync(STATE_FILE + '.tmp', JSON.stringify(state, null, 1)); fs.renameSync(STATE_FILE + '.tmp', STATE_FILE); } catch (e) { console.error('save: ' + e.message); } }, 150); };
 
@@ -124,26 +125,15 @@ const commands = {
   reset() { state = Object.assign(fresh(), { setup: state.setup }); },
 };
 
-// game master key, with a brake on guessing
-const bad = new Map();
-function keyOK(req, u) {
-  if (!KEY) return true;
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress, now = Date.now(), b = bad.get(ip);
-  if (b && now - b.t < 60000 && b.n >= 8) return null;
-  const k = String(req.headers['x-key'] || u.searchParams.get('key') || '');
-  if (k.length === KEY.length && crypto.timingSafeEqual(Buffer.from(k), Buffer.from(KEY))) return true;
-  bad.set(ip, b && now - b.t < 60000 ? { n: b.n + 1, t: b.t } : { n: 1, t: now }); return false;
-}
 const codeOK = (u) => !S().joinCode || (u.searchParams.get('code') || '').trim().toLowerCase() === S().joinCode.toLowerCase();
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.png': 'image/png', '.woff2': 'font/woff2', '.json': 'application/json', '.svg': 'image/svg+xml' };
 const json = (res, code, obj) => { res.writeHead(code, { 'Content-Type': TYPES['.json'], 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); };
-const deny = (res, ok) => { res.writeHead(ok === null ? 429 : 403); res.end(); };
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
   if (u.pathname === '/events') {
     const control = u.searchParams.has('control'), watch = !control && u.searchParams.has('watch');
-    if (control) { const ok = keyOK(req, u); if (!ok) return deny(res, ok); } else if (!watch && !codeOK(u)) return deny(res, false);
+    if (!control && !watch && !codeOK(u)) { res.writeHead(403); return res.end(); }
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
     const c = { res, control, watch, team: u.searchParams.get('team'), role: u.searchParams.get('role') };
     clients.add(c); push(c); if (!control) broadcast();
@@ -152,9 +142,7 @@ const server = http.createServer((req, res) => {
   }
   if (u.pathname === '/seats') return codeOK(u) ? json(res, 200, { title: content.title, teams: S().teams }) : json(res, 403, { title: content.title, needCode: true });
   if (u.pathname === '/healthz') return json(res, 200, { ok: true, devices: clients.size });
-  if (u.pathname === '/auth') { const ok = keyOK(req, u); if (!ok) return deny(res, ok); res.writeHead(204); return res.end(); }
   if (u.pathname === '/cmd' && req.method === 'POST') {
-    const ok = keyOK(req, u); if (!ok) return deny(res, ok);
     let body = ''; req.on('data', (d) => { body += d; if (body.length > 1e5) req.destroy(); });
     req.on('end', () => { try { const m = JSON.parse(body); if (Object.hasOwn(commands, m.type)) { commands[m.type](m); save(); broadcast(); } res.writeHead(204); } catch { res.writeHead(400); } res.end(); });
     return;
@@ -175,6 +163,6 @@ server.listen(PORT, '0.0.0.0', () => {
   const ips = Object.values(os.networkInterfaces()).flat().filter((i) => i.family === 'IPv4' && !i.internal).map((i) => i.address);
   console.log(`\nAIGI table timer\n`);
   for (const h of ips.length ? ips : ['localhost']) console.log(`  Portal        http://${h}:${PORT}/\n  Participants  http://${h}:${PORT}/play\n  Game master   http://${h}:${PORT}/gm\n  Observers     http://${h}:${PORT}/watch\n`);
-  console.log(KEY ? `  Game master key: ${KEY}\n` : `  No game master key set (AIGI_KEY). Anyone with the address can open /gm.\n`);
+  console.log(`  The game master page has no key: anyone who can reach this address can open /gm.\n`);
   save();
 });

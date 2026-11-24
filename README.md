@@ -13,7 +13,7 @@ It prints the links.
 | `/` | everyone | The portal: Participant, Observer or Game master |
 | `/play` | participants | Pick a table once; the device remembers it. Or open a table's own link from Setup |
 | `/watch` | observers | A screen for the observers' monitor: plays each film in full quality as it is shown in the room, then shows where the game is |
-| `/gm` | game master | Open to anyone with the address, unless a key is set (`AIGI_KEY=... node table/server.js`) |
+| `/gm` | game master | Open to anyone who can reach the address. There is no key |
 
 ## Game master
 
@@ -51,18 +51,9 @@ Use Chrome on the monitor's computer. Safari, iPhones and iPads may make the fil
 
 What's there now (21 Nov): names, facts and film numbers follow the reads as shot on 19 Nov. A cue names the film to play ("Film 05 · D2 B", "Ending 1D + 2A + 3B"). Posts and leaks are copied from `data/social.json`; items marked `"draft": true` are wording the script only describes and still need approving. The Decide questions are the 17 Nov ones with the names changed. Thursday's two outcome steps (the next model release, evidence sharing) are recorded by the game master only and are not shown on tablets; they and the choice-to-ending map are a reading of the films and need confirming.
 
-## Hosting it on a domain
+## Running it in the room
 
-The app is ready to sit behind a domain; what's needed is a small always-on host and one DNS record.
-
-1. Put it on a host that runs a container or Node and gives https (Fly.io, Render, Railway, or a VM with Caddy). `Dockerfile` is here.
-2. Set `AIGI_KEY` (the game master key, 8 characters or more) as a secret. Mount a volume and point `AIGI_STATE` at it so a restart keeps the clock and the setup.
-3. Point a subdomain (say `play.<the AIGI domain>`) at the host with a CNAME, and add it as a custom domain there.
-4. Use a plan that never sleeps and runs **one** instance: the state is in memory, so two instances would disagree.
-
-Hosted over https, devices hold their own screens awake and any Wi-Fi or mobile data will do.
-
-## Running it in the room instead
+This is how the app is meant to run: on a laptop in the room, with the tablets on the same network. The game master page has no key, so anyone on that network can open `/gm`. Keep the network to the room's own devices (a travel router or a hotspot with a password).
 
 All devices and the laptop need to be on one network that lets devices talk to each other. Guest Wi-Fi often blocks that, so test the venue's network or bring a travel router. Over plain http a page can't hold the screen awake: set Auto-Lock to Never on each tablet.
 
@@ -70,4 +61,8 @@ All devices and the laptop need to be on one network that lets devices talk to e
 
 - The server sends an end time, not ticks, so a device that drops its connection keeps counting and catches up when it reconnects (an amber dot shows meanwhile). A device that hears nothing for 25 seconds reconnects by itself.
 - On an iPad, Share → Add to Home Screen gives a full-screen app with no browser bars.
-- Env: `PORT` (2424), `AIGI_KEY`, `AIGI_STATE`. Delete `state.json` to start clean.
+- Env: `PORT` (2424), `AIGI_STATE`. Delete `state.json` to start clean.
+
+## Hosting it on a public address
+
+Don't, as it is. The game master key was removed on 24 Nov because the app only runs in the room. On a public address anyone who found it could open `/gm` and start clocks, send items or reset the game. To host it, put the key check back first (it is in the git history of `server.js` and `public/control.html`) or put the whole app behind the host's own password. `Dockerfile` is still here for that: mount a volume at `/data` so a restart keeps the clock and the setup, and run **one** instance, because the state is in memory.

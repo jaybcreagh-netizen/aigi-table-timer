@@ -7,7 +7,7 @@
      Run: the day as a list, in order, with one big button for the next step. When the next step is the day's decision, the button
      becomes the choices; the answer picks which bulletin version and follow-ups the later days show. A film cue also starts that film on the
      observers' screen (/watch): tap it as the film starts in the room. Where the app can't tell which version, the button becomes the versions. Everything else on the page is an override.
-     Setup: minutes and tables. If the server has a key set (AIGI_KEY) it is asked for once and kept on the device. -->
+     Setup: minutes and tables. There is no key: the page is open to anyone who can reach the address. -->
 <style>
 @font-face { font-family: "Schibsted Grotesk"; font-weight: 400 900; src: url("fonts/schibsted-grotesk-latin-wght-normal.woff2") format("woff2"); }
 @font-face { font-family: "ArchivoV"; font-weight: 100 900; font-stretch: 62% 125%; src: url("fonts/archivo-latin-wdth-normal.woff2") format("woff2"); }
@@ -18,7 +18,7 @@ button, select, textarea, input { font: inherit; color: inherit; } button { curs
 input, textarea, select { background: rgba(114,152,233,.08); border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 12px; } input:focus, textarea:focus { outline: 0; border-color: var(--blue); }
 .row { display: flex; gap: 8px; } .row > * { flex: 1; min-width: 0; }
 .tabs { display: flex; gap: 22px; margin: 0 2px 18px; border-bottom: 1px solid var(--line); } .tabs button { padding: 8px 0 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; font-size: 12px; color: var(--soft); border-bottom: 2px solid transparent; margin-bottom: -1px; } .tabs button.on { color: #fff; border-color: var(--blue); }
-body[data-tab="run"] #setup, body[data-tab="setup"] #run, body.locked .tabs, body.locked #run, body.locked #setup, body:not(.locked) #login { display: none; }
+body[data-tab="run"] #setup, body[data-tab="setup"] #run { display: none; }
 .days button { padding: 11px 0; border-radius: 99px; border: 1.5px solid var(--line); font-weight: 500; color: var(--soft); text-align: center; }
 .days button.on { background: var(--blue); border-color: var(--blue); color: var(--navy); font-weight: 600; }
 .clock { display: flex; align-items: baseline; justify-content: space-between; margin: 24px 2px 14px; }
@@ -57,12 +57,10 @@ textarea { width: 100%; min-height: 70px; resize: vertical; } .note .row { margi
 details { margin-top: 14px; } summary { cursor: pointer; font-weight: 600; color: var(--blue); padding: 6px 2px; }
 .big { display: block; width: 100%; margin-top: 34px; padding: 15px; border: 1.5px solid var(--line); border-radius: 12px; font-weight: 600; text-align: center; }
 .link { color: var(--soft); font-size: 13px; text-decoration: underline; padding: 0; margin-top: 16px; }
-.off { position: fixed; left: 0; right: 0; top: 0; padding: 8px; text-align: center; background: #F2B134; color: #15120A; font-weight: 600; font-size: 13px; display: none; z-index: 3; } body.offline:not(.locked) .off { display: block; }
-#login { margin-top: 22vh; text-align: center; } #login h1 { font-family: "ArchivoV"; font-weight: 500; font-stretch: 100%; letter-spacing: -.025em; font-size: 40px; margin: 0 0 22px; } #login input { width: 100%; text-align: center; font-size: 19px; font-weight: 500; padding: 15px; } #login p { color: var(--soft); font-size: 14px; min-height: 1.4em; }
+.off { position: fixed; left: 0; right: 0; top: 0; padding: 8px; text-align: center; background: #F2B134; color: #15120A; font-weight: 600; font-size: 13px; display: none; z-index: 3; } body.offline .off { display: block; }
 </style></head>
-<body class="locked" data-tab="run">
+<body data-tab="run">
 <div class="off">Not connected. Devices keep counting.</div>
-<form id="login"><h1>Game master</h1><input id="key" type="password" placeholder="Key" autocomplete="current-password" enterkeyhint="go"><p id="msg"></p></form>
 <div class="tabs"><button data-tab="run" class="on">Run</button><button data-tab="setup">Setup</button></div>
 
 <div id="run">
@@ -91,11 +89,10 @@ details { margin-top: 14px; } summary { cursor: pointer; font-weight: 600; color
 </div>
 <script>
 const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const store = { get: (k) => { try { return localStorage.getItem(k) || ''; } catch { return ''; } }, set: (k, x) => { try { x ? localStorage.setItem(k, x) : localStorage.removeItem(k); } catch {} } };
-const Q = new URLSearchParams(location.search);
-if (Q.get('key')) { store.set('aigi-gm-key', Q.get('key')); history.replaceState(null, '', 'gm'); }
-let choosing = -1, key = store.get('aigi-gm-key'), v = null, offset = 0, sigRun = '', sigSetup = '', es = null, last = 0, hold = 0;
-const cmd = (type, more = {}) => fetch('cmd', { method: 'POST', headers: { 'x-key': key }, body: JSON.stringify({ type, ...more }) }).then((r) => { if (r.status === 403) lock('That key no longer works.'); });
+try { localStorage.removeItem('aigi-gm-key'); } catch {}   // a key kept on this device from when there was one
+if (location.search) history.replaceState(null, '', 'gm');
+let choosing = -1, v = null, offset = 0, sigRun = '', sigSetup = '', es = null, last = 0, hold = 0;
+const cmd = (type, more = {}) => fetch('cmd', { method: 'POST', body: JSON.stringify({ type, ...more }) }).catch(() => document.body.classList.add('offline'));
 const seatName = (id) => { if (id === 'all') return 'Everyone'; for (const t of v.setup.teams) { if (t.id === id) return t.name; const r = t.roles.find((x) => x.id === id); if (r) return `${r.name} · ${t.name}`; } return 'Nobody (removed)'; };
 const today = () => v.days.find((d) => d.id === v.day), run = () => today().run || [];
 const sentKey = (id, to) => `${v.day}:${id}:${to}`, isSent = (id, to) => v.sent.some((x) => x.key === sentKey(id, to));
@@ -121,22 +118,13 @@ function stepText(s) {
   return { kind: 'Cue', title: s.cue, sub, film: hasFilm(s), pick: filmPick(s) };
 }
 
-function lock(msg) { if (es) es.close(); store.set('aigi-gm-key', ''); key = ''; document.body.classList.add('locked'); $('msg').textContent = msg || ''; $('key').value = ''; }
-async function unlock() {
-  const r = await fetch('auth', { headers: { 'x-key': key } }).catch(() => null);
-  if (!r) return $('msg').textContent = 'No connection.';
-  if (r.status === 429) return $('msg').textContent = 'Too many tries. Wait a minute.';
-  if (!r.ok) return lock(key ? 'Wrong key.' : '');
-  store.set('aigi-gm-key', key); document.body.classList.remove('locked'); connect();
-}
-$('login').onsubmit = (e) => { e.preventDefault(); key = $('key').value.trim(); if (key) unlock(); };
 function connect() {
   if (es) es.close(); last = Date.now();
-  es = new EventSource('events?control=1&key=' + encodeURIComponent(key));
+  es = new EventSource('events?control=1');
   es.onmessage = (m) => { v = JSON.parse(m.data); last = Date.now(); offset = v.now - Date.now(); document.body.classList.remove('offline'); render(); };
   es.onerror = () => document.body.classList.add('offline');
 }
-setInterval(() => { if (!document.body.classList.contains('locked') && Date.now() - last > 25000) { document.body.classList.add('offline'); connect(); } }, 5000);
+setInterval(() => { if (Date.now() - last > 25000) { document.body.classList.add('offline'); connect(); } }, 5000);
 
 function render() {
   const day = today(), teams = v.setup.teams, steps = run(), di = v.days.findIndex((d) => d.id === v.day), nextDay = v.days[di + 1];
@@ -222,6 +210,6 @@ document.addEventListener('change', (e) => { const el = e.target, d = el.dataset
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('#setup input')) e.target.blur(); });
 document.addEventListener('focusout', () => setTimeout(() => v && render(), 0));
-unlock();
+connect();
 </script>
 </body></html>
